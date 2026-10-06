@@ -1,0 +1,30 @@
+{
+  "name": "@sequel/sql-engine",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint --max-warnings=0 src",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@sequel/contracts": "workspace:*",
+    "libpg-query": "^18.1.5",
+    "pg": "^8.23.1",
+    "pg-cursor": "^2.22.1"
+  },
+  "devDependencies": {
+    "@sequel/eslint-config": "workspace:*",
+    "@sequel/tsconfig": "workspace:*",
+    "@types/node": "^24.0.0",
+    "eslint": "^10.12.0",
+    "typescript": "5.9.3",
+    "vitest": "^5.0.3",
+    "@types/pg": "^8.23.1",
+    "@types/pg-cursor": "^2.7.2"
+  }
+}
