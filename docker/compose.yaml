@@ -1,0 +1,110 @@
+name: sequel
+
+x-app-environment: &app-environment
+  NODE_ENV: production
+  DATABASE_URL: postgres://${POSTGRES_APP_ROLE}:${POSTGRES_APP_PASSWORD}@postgres:5432/${POSTGRES_APP_DB}
+  SANDBOX_DATABASE_URL: postgres://${POSTGRES_SANDBOX_ADMIN_ROLE}:${POSTGRES_SANDBOX_ADMIN_PASSWORD}@postgres:5432/${POSTGRES_SANDBOX_DB}
+  SANDBOX_READER_DATABASE_URL: postgres://${POSTGRES_SANDBOX_READER_ROLE}:${POSTGRES_SANDBOX_READER_PASSWORD}@postgres:5432/${POSTGRES_SANDBOX_DB}
+  SANDBOX_WRITER_DATABASE_URL: postgres://${POSTGRES_SANDBOX_WRITER_ROLE}:${POSTGRES_SANDBOX_WRITER_PASSWORD}@postgres:5432/${POSTGRES_SANDBOX_DB}
+  POSTGRES_SUPERUSER_URL: postgres://${POSTGRES_SUPERUSER}:${POSTGRES_SUPERUSER_PASSWORD}@postgres:5432/postgres
+  REDIS_URL: redis://redis:6379
+  API_URL: http://api:${API_PORT}
+
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE}
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_SUPERUSER}
+      POSTGRES_PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD}
+      POSTGRES_DB: postgres
+    command:
+      - postgres
+      - -c
+      - max_connections=200
+      - -c
+      - shared_buffers=256MB
+      - -c
+      - log_min_duration_statement=-1
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_SUPERUSER} -d postgres"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  redis:
+    image: ${REDIS_IMAGE}
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
+    ports:
+      - "${REDIS_PORT}:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  setup:
+    profiles: ["app"]
+    build:
+      context: ..
+      dockerfile: docker/cli.Dockerfile
+    env_file: ../.env
+    environment: *app-environment
+    command: ["setup"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  api:
+    profiles: ["app"]
+    build:
+      context: ..
+      dockerfile: docker/api.Dockerfile
+    env_file: ../.env
+    environment: *app-environment
+    ports:
+      - "${API_PORT}:${API_PORT}"
+    depends_on:
+      setup:
+        condition: service_completed_successfully
+
+  worker:
+    profiles: ["app"]
+    build:
+      context: ..
+      dockerfile: docker/worker.Dockerfile
+    env_file: ../.env
+    environment: *app-environment
+    depends_on:
+      setup:
+        condition: service_completed_successfully
+
+  web:
+    profiles: ["app"]
+    build:
+      context: ..
+      dockerfile: docker/web.Dockerfile
+      args:
+        API_URL: http://api:${API_PORT}
+        API_BASE_PATH: ${API_BASE_PATH}
+        JOB_POLL_INTERVAL_MS: ${JOB_POLL_INTERVAL_MS}
+        APP_VERSION: ${APP_VERSION}
+    env_file: ../.env
+    environment: *app-environment
+    ports:
+      - "${WEB_PORT}:${WEB_PORT}"
+    depends_on:
+      - api
+
+volumes:
+  postgres-data:
+  redis-data:
