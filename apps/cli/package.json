@@ -1,0 +1,35 @@
+{
+  "name": "@sequel/cli",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/main.ts",
+    "build": "tsup",
+    "lint": "eslint --max-warnings=0 src",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@sequel/config": "workspace:*",
+    "@sequel/contracts": "workspace:*",
+    "@sequel/core": "workspace:*",
+    "@sequel/datasets": "workspace:*",
+    "@sequel/db": "workspace:*",
+    "@sequel/sql-engine": "workspace:*",
+    "pg": "^8.23.1",
+    "pino": "^10.4.0"
+  },
+  "devDependencies": {
+    "@sequel/eslint-config": "workspace:*",
+    "@sequel/tsconfig": "workspace:*",
+    "@types/node": "^24.0.0",
+    "eslint": "^10.12.0",
+    "pino-pretty": "^13.2.0",
+    "tsup": "^8.5.1",
+    "tsx": "^4.23.15",
+    "typescript": "5.9.3",
+    "vitest": "^5.0.3",
+    "@types/pg": "^8.23.1"
+  }
+}
