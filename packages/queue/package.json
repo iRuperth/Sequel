@@ -1,0 +1,26 @@
+{
+  "name": "@sequel/queue",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint --max-warnings=0 src",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@sequel/contracts": "workspace:*",
+    "bullmq": "^6.3.12",
+    "ioredis": "^5.8.2",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@sequel/eslint-config": "workspace:*",
+    "@sequel/tsconfig": "workspace:*",
+    "@types/node": "^24.0.0",
+    "eslint": "^10.12.0",
+    "typescript": "5.9.3"
+  }
+}
