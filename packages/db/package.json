@@ -1,0 +1,29 @@
+{
+  "name": "@sequel/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "lint": "eslint --max-warnings=0 src",
+    "typecheck": "tsc -p tsconfig.json",
+    "generate": "drizzle-kit generate --config drizzle.config.ts"
+  },
+  "dependencies": {
+    "@sequel/contracts": "workspace:*",
+    "drizzle-orm": "^0.45.4",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "@sequel/eslint-config": "workspace:*",
+    "@sequel/tsconfig": "workspace:*",
+    "@types/node": "^24.0.0",
+    "@types/pg": "^8.23.1",
+    "drizzle-kit": "^0.31.11",
+    "eslint": "^10.12.0",
+    "typescript": "5.9.3"
+  }
+}
