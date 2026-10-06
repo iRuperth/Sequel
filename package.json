@@ -1,0 +1,30 @@
+{
+  "name": "sequel",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.32.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "turbo run dev --parallel --filter=@sequel/web --filter=@sequel/api --filter=@sequel/worker",
+    "build": "turbo run build",
+    "lint": "turbo run lint && eslint --max-warnings=0 .",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test --filter=!@sequel/integration-tests",
+    "test:integration": "pnpm --filter @sequel/integration-tests test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "cli": "pnpm --filter @sequel/cli start"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@sequel/eslint-config": "workspace:*",
+    "@types/node": "^24.0.0",
+    "eslint": "^10.12.0",
+    "prettier": "^3.9.10",
+    "turbo": "^2.11.7",
+    "typescript": "5.9.3",
+    "typescript-eslint": "^8.71.1"
+  }
+}
