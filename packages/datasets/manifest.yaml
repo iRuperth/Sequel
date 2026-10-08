@@ -1,0 +1,79 @@
+datasets:
+  - slug: fintech
+    name: Payments and Banking
+    domain: Fintech
+    description: >-
+      Core data of the digital bank: account holders and their KYC history, current, savings and
+      business accounts, debit and virtual cards, card authorisations enriched with merchant data,
+      SEPA and domestic transfers, daily FX reference rates, fraud alerts, chargeback disputes,
+      consumer loans with their repayment schedules and the double entry ledger that ties money
+      movements together. This is the flagship dataset used by onboarding exercises.
+    ownerTeam: Payments Data Platform
+    displayOrder: 1
+    tags:
+      - payments
+      - cards
+      - banking
+      - risk
+      - lending
+      - flagship
+
+  - slug: ecommerce
+    name: Online Store
+    domain: Ecommerce
+    description: >-
+      Operational data of the online store: customers and their addresses, the product catalogue
+      and stock per warehouse, promotions, orders and order lines, payment attempts, shipments
+      handed to carriers and customer returns.
+    ownerTeam: Commerce Analytics
+    displayOrder: 2
+    tags:
+      - orders
+      - customers
+      - catalogue
+      - fulfilment
+
+  - slug: hr
+    name: People and Workforce
+    domain: Human Resources
+    description: >-
+      Workforce data from the HR information system: offices, departments, employees with their
+      reporting lines, job history, salary bands, performance review cycles and leave requests.
+      Contains sensitive personal data, so access is restricted to people analytics use cases.
+    ownerTeam: People Analytics
+    displayOrder: 3
+    tags:
+      - people
+      - workforce
+      - compensation
+      - sensitive
+
+  - slug: web
+    name: Web and Product Analytics
+    domain: Digital Marketing
+    description: >-
+      Clickstream collected by the web tracking pipeline: marketing campaigns, sessions with
+      attribution and device details, page views, product interaction events with JSON
+      properties and A/B experiment assignments.
+    ownerTeam: Growth Engineering
+    displayOrder: 4
+    tags:
+      - clickstream
+      - marketing
+      - experimentation
+      - attribution
+
+  - slug: finance
+    name: Corporate Finance
+    domain: Finance
+    description: >-
+      General ledger and accounts payable and receivable data from the ERP: cost centers, the
+      chart of accounts, month end exchange rates, supplier and customer invoices with their
+      lines, journal entries and the approved budget per cost center.
+    ownerTeam: Finance Systems
+    displayOrder: 5
+    tags:
+      - ledger
+      - invoices
+      - budgeting
+      - erp
