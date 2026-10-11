@@ -1,0 +1,318 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant light (&:where(.light, .light *));
+
+:root,
+.light {
+  color-scheme: light;
+  --background: #f5f6f8;
+  --surface: #ffffff;
+  --surface-2: #f0f2f5;
+  --surface-3: #e6e9ee;
+  --border: #dfe3e8;
+  --border-strong: #c9cfd7;
+  --fg: #1b2430;
+  --fg-muted: #5b6676;
+  --fg-subtle: #8a94a3;
+  --accent: #2e6db4;
+  --accent-hover: #275f9e;
+  --accent-fg: #ffffff;
+  --accent-2: #2a67ad;
+  --success: #1f8a5b;
+  --warning: #a8740f;
+  --danger: #c43d3d;
+  --danger-hover: #ad3434;
+  --overlay: rgb(15 23 32 / 0.32);
+  --selection: rgb(46 109 180 / 0.16);
+  --chart-1: #2e6db4;
+  --chart-2: #2a9d8f;
+  --chart-3: #c08a2e;
+  --chart-4: #6ea8dc;
+  --chart-5: #7466c4;
+  --chart-6: #1f4e8c;
+  --chart-grid: #e6e9ee;
+  --heat-0: #ebeef2;
+  --heat-1: #c9dcf0;
+  --heat-2: #93bde6;
+  --heat-3: #4f8fd0;
+  --heat-4: #2e6db4;
+  --cm-background: #ffffff;
+  --cm-gutter: #fafbfc;
+  --cm-gutter-fg: #9aa3af;
+  --cm-active-line: rgb(46 109 180 / 0.045);
+  --cm-active-gutter: rgb(46 109 180 / 0.07);
+  --cm-selection: rgb(46 109 180 / 0.17);
+  --cm-cursor: #1f5fa8;
+  --cm-match: rgb(46 109 180 / 0.13);
+  --cm-keyword: #1f5fa8;
+  --cm-type: #0f7490;
+  --cm-function: #2e6db4;
+  --cm-string: #2b7a55;
+  --cm-number: #9a6400;
+  --cm-comment: #8a94a3;
+  --cm-operator: #4a5565;
+  --cm-punctuation: #6b7686;
+  --cm-identifier: #1b2430;
+  --cm-special: #6b4fb3;
+  --cm-error: rgb(196 61 61 / 0.14);
+}
+
+.dark {
+  color-scheme: dark;
+  --background: #1d2025;
+  --surface: #24282e;
+  --surface-2: #2b3037;
+  --surface-3: #343a42;
+  --border: #393f48;
+  --border-strong: #4a515b;
+  --fg: #e4e7eb;
+  --fg-muted: #a3abb6;
+  --fg-subtle: #7d8693;
+  --accent: #2e6db4;
+  --accent-hover: #3a7bc8;
+  --accent-fg: #ffffff;
+  --accent-2: #6aa8e0;
+  --success: #4caf84;
+  --warning: #d4a548;
+  --danger: #e06c62;
+  --danger-hover: #e8817a;
+  --overlay: rgb(0 0 0 / 0.55);
+  --selection: rgb(106 168 224 / 0.26);
+  --chart-1: #6aa8e0;
+  --chart-2: #4fb3a9;
+  --chart-3: #d4a548;
+  --chart-4: #a9cdf0;
+  --chart-5: #a497df;
+  --chart-6: #3a7bc8;
+  --chart-grid: #363c45;
+  --heat-0: #2b3037;
+  --heat-1: #25476e;
+  --heat-2: #2d5f99;
+  --heat-3: #3874c4;
+  --heat-4: #6aa8e0;
+  --cm-background: #1f2328;
+  --cm-gutter: #1f2328;
+  --cm-gutter-fg: #6b7482;
+  --cm-active-line: rgb(255 255 255 / 0.035);
+  --cm-active-gutter: rgb(255 255 255 / 0.06);
+  --cm-selection: rgb(106 168 224 / 0.25);
+  --cm-cursor: #9cc7f0;
+  --cm-match: rgb(106 168 224 / 0.18);
+  --cm-keyword: #6cb0ee;
+  --cm-type: #7cc4e8;
+  --cm-function: #9cc7f0;
+  --cm-string: #9fd0a8;
+  --cm-number: #e2b979;
+  --cm-comment: #7a8492;
+  --cm-operator: #b4bcc7;
+  --cm-punctuation: #8a939f;
+  --cm-identifier: #e4e7eb;
+  --cm-special: #b9a6e6;
+  --cm-error: rgb(224 108 98 / 0.2);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-2: var(--accent-2);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-danger-hover: var(--danger-hover);
+  --color-overlay: var(--overlay);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-chart-6: var(--chart-6);
+  --color-heat-0: var(--heat-0);
+  --color-heat-1: var(--heat-1);
+  --color-heat-2: var(--heat-2);
+  --color-heat-3: var(--heat-3);
+  --color-heat-4: var(--heat-4);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, "SFMono-Regular", monospace;
+  --radius-xs: 3px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 6px;
+  --radius-xl: 6px;
+  --text-2xs: 10.5px;
+  --text-2xs--line-height: 14px;
+  --text-xs: 11.5px;
+  --text-xs--line-height: 16px;
+  --text-sm: 12.5px;
+  --text-sm--line-height: 18px;
+  --text-base: 13px;
+  --text-base--line-height: 20px;
+  --text-md: 14px;
+  --text-md--line-height: 20px;
+  --text-lg: 16px;
+  --text-lg--line-height: 24px;
+  --text-xl: 19px;
+  --text-xl--line-height: 26px;
+  --text-2xl: 24px;
+  --text-2xl--line-height: 30px;
+  --text-3xl: 30px;
+  --text-3xl--line-height: 36px;
+  --animate-fade-in: fade-in 120ms ease-out;
+  --animate-pulse-soft: pulse-soft 1.6s ease-in-out infinite;
+  --animate-indeterminate: indeterminate 1.4s ease-in-out infinite;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(300%);
+  }
+}
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--border);
+  }
+
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+    font-feature-settings: "cv11", "ss01", "ss03";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--selection);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent-2);
+    outline-offset: 1px;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--border-strong);
+    border: 3px solid transparent;
+    border-radius: 999px;
+    background-clip: content-box;
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
+@layer components {
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tok-keyword {
+    color: var(--cm-keyword);
+  }
+  .tok-typeName {
+    color: var(--cm-type);
+  }
+  .tok-string {
+    color: var(--cm-string);
+  }
+  .tok-number,
+  .tok-bool,
+  .tok-null {
+    color: var(--cm-number);
+  }
+  .tok-comment {
+    color: var(--cm-comment);
+    font-style: italic;
+  }
+  .tok-operator {
+    color: var(--cm-operator);
+  }
+  .tok-punctuation {
+    color: var(--cm-punctuation);
+  }
+  .tok-variableName,
+  .tok-propertyName {
+    color: var(--cm-identifier);
+  }
+  .tok-special {
+    color: var(--cm-special);
+  }
+
+  .cm-editor .cm-error-mark {
+    background-color: var(--cm-error);
+    text-decoration: underline wavy var(--danger);
+    text-underline-offset: 3px;
+  }
+
+  .cm-editor .cm-error-line {
+    background-color: var(--cm-error);
+  }
+
+  .recharts-surface:focus,
+  .recharts-wrapper:focus {
+    outline: none;
+  }
+}
