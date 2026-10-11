@@ -1,0 +1,46 @@
+{
+  "key": "hr-001",
+  "order": 1,
+  "title": "Current headcount by department",
+  "track": "data_analyst",
+  "difficulty": "beginner",
+  "topics": ["joins", "aggregation", "filtering"],
+  "datasetSlugs": ["hr"],
+  "mode": "read",
+  "stakeholder": {
+    "name": "Grace O'Connor",
+    "role": "People Analytics Lead",
+    "team": "People Analytics"
+  },
+  "businessContext": "The leadership offsite needs a simple headcount slide. Grace asks for the current number of people in each department. Employees on leave are still part of the headcount; people who have left the company are not.",
+  "requirements": [
+    "Count employees in hr.employees whose status is 'active' or 'on_leave'.",
+    "Show the department name from hr.departments rather than the id.",
+    "Sort from the largest department to the smallest, breaking ties by department name."
+  ],
+  "acceptanceCriteria": [
+    "One row per department that has at least one current employee.",
+    "Columns are department_name and active_headcount, in that order.",
+    "Terminated employees are excluded."
+  ],
+  "expectedColumns": [
+    {
+      "name": "department_name",
+      "typeHint": "text"
+    },
+    {
+      "name": "active_headcount",
+      "typeHint": "integer"
+    }
+  ],
+  "orderMatters": true,
+  "referenceSql": "SELECT d.department_name,\n       COUNT(*) AS active_headcount\nFROM hr.employees AS e\nJOIN hr.departments AS d ON d.department_id = e.department_id\nWHERE e.status IN ('active', 'on_leave')\nGROUP BY d.department_name\nORDER BY active_headcount DESC, d.department_name;\n",
+  "verificationSql": null,
+  "hints": [
+    "Join hr.employees to hr.departments on department_id.",
+    "Filter with status IN ('active', 'on_leave') before grouping.",
+    "GROUP BY the department name and ORDER BY the count descending with the name as tie breaker."
+  ],
+  "explanation": "Filtering on status before aggregating keeps leavers out of the count, and joining to departments returns readable names. The secondary sort on the name makes the order stable when two departments have the same size.",
+  "estimatedMinutes": 8
+}

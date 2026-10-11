@@ -1,0 +1,59 @@
+{
+  "key": "web-002",
+  "order": 2,
+  "title": "Read out the one page checkout experiment",
+  "track": "data_scientist",
+  "difficulty": "advanced",
+  "topics": ["ctes", "subqueries", "analytics_patterns", "aggregation"],
+  "datasetSlugs": ["web"],
+  "mode": "read",
+  "stakeholder": {
+    "name": "Arjun Patel",
+    "role": "Senior Data Scientist",
+    "team": "Experimentation Platform"
+  },
+  "businessContext": "The checkout_one_page experiment has finished and product wants a go or no go. Arjun asks for the standard readout: per variant, how many visitors were assigned, how many of them purchased while the experiment was running and the relative lift of treatment over control. Conversion is measured per visitor, from the moment of assignment until the experiment ended.",
+  "requirements": [
+    "Take the experiment with experiment_key 'checkout_one_page' from web.experiments and its assignments from web.experiment_assignments.",
+    "A visitor converts when web.events has a 'purchase' event for the same visitor_id with event_at at or after assigned_at and before the experiment ended_at.",
+    "Return per variant the assigned visitors, converting visitors and the conversion rate in percent rounded to 2 decimals.",
+    "lift_vs_control_pct is the relative difference between the variant rate and the control rate in percent, computed from unrounded rates and rounded to 2 decimals; it is null for the control row."
+  ],
+  "acceptanceCriteria": [
+    "Exactly two rows, control and treatment.",
+    "Columns are variant, visitors, converting_visitors, conversion_rate_pct and lift_vs_control_pct, in that order.",
+    "Purchases made before assignment or after the experiment ended do not count."
+  ],
+  "expectedColumns": [
+    {
+      "name": "variant",
+      "typeHint": "text"
+    },
+    {
+      "name": "visitors",
+      "typeHint": "integer"
+    },
+    {
+      "name": "converting_visitors",
+      "typeHint": "integer"
+    },
+    {
+      "name": "conversion_rate_pct",
+      "typeHint": "decimal"
+    },
+    {
+      "name": "lift_vs_control_pct",
+      "typeHint": "decimal"
+    }
+  ],
+  "orderMatters": false,
+  "referenceSql": "WITH experiment AS (\n  SELECT experiment_id, COALESCE(ended_at, TIMESTAMPTZ 'infinity') AS ended_at\n  FROM web.experiments\n  WHERE experiment_key = 'checkout_one_page'\n),\nvisitor_outcomes AS (\n  SELECT a.variant,\n         a.visitor_id,\n         EXISTS (\n           SELECT 1\n           FROM web.events AS e\n           WHERE e.visitor_id = a.visitor_id\n             AND e.event_name = 'purchase'\n             AND e.event_at >= a.assigned_at\n             AND e.event_at < x.ended_at\n         ) AS converted\n  FROM web.experiment_assignments AS a\n  JOIN experiment AS x ON x.experiment_id = a.experiment_id\n),\nvariant_rates AS (\n  SELECT variant,\n         COUNT(*) AS visitors,\n         COUNT(*) FILTER (WHERE converted) AS converting_visitors,\n         COUNT(*) FILTER (WHERE converted)::numeric / COUNT(*) AS conversion_rate\n  FROM visitor_outcomes\n  GROUP BY variant\n)\nSELECT v.variant,\n       v.visitors,\n       v.converting_visitors,\n       ROUND(100 * v.conversion_rate, 2) AS conversion_rate_pct,\n       CASE\n         WHEN v.variant = 'control' THEN NULL\n         ELSE ROUND(100 * (v.conversion_rate - c.conversion_rate) / NULLIF(c.conversion_rate, 0), 2)\n       END AS lift_vs_control_pct\nFROM variant_rates AS v\nCROSS JOIN (SELECT conversion_rate FROM variant_rates WHERE variant = 'control') AS c\nORDER BY v.variant;\n",
+  "verificationSql": null,
+  "hints": [
+    "Build one row per assigned visitor with a converted flag; EXISTS against web.events with the time bounds works well.",
+    "Aggregate per variant and keep the unrounded rate in a CTE so you can reuse it for the lift.",
+    "CROSS JOIN the control row to every variant and compute (rate - control_rate) / control_rate * 100."
+  ],
+  "explanation": "Conversion is defined per visitor, so the analysis starts at assignment grain and checks for a purchase in the exposure window with EXISTS. Keeping the raw rates in a CTE avoids compounding rounding errors when the lift is computed, and cross joining the single control row makes the comparison explicit.",
+  "estimatedMinutes": 30
+}

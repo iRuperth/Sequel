@@ -1,0 +1,58 @@
+{
+  "key": "ecommerce-002",
+  "order": 2,
+  "title": "Find duplicate customer accounts hidden by email casing",
+  "track": "data_engineer",
+  "difficulty": "advanced",
+  "topics": ["data_quality", "string_functions", "aggregation", "joins"],
+  "datasetSlugs": ["ecommerce"],
+  "mode": "read",
+  "stakeholder": {
+    "name": "Kenji Sato",
+    "role": "CRM Data Engineer",
+    "team": "Customer Data Platform"
+  },
+  "businessContext": "Our sign up flow used to store emails exactly as typed, so some shoppers registered twice with the same address in different casing and now have split order histories and double marketing sends. Before the CRM merge job runs, Kenji needs the list of affected email addresses with every customer id involved and how many orders sit across the duplicate accounts.",
+  "requirements": [
+    "Normalise emails with LOWER() and find the normalised addresses used by more than one customer in ecommerce.customers.",
+    "For each such address return the number of accounts, the customer ids as a comma separated list in ascending order, the earliest created_at among the accounts and the total number of orders placed by all of those accounts.",
+    "Accounts without orders still count towards account_count."
+  ],
+  "acceptanceCriteria": [
+    "Columns are normalized_email, account_count, customer_ids, first_created_at and total_orders, in that order.",
+    "customer_ids looks like 1201,8873 with ids sorted ascending and no spaces.",
+    "Every row has account_count of at least 2."
+  ],
+  "expectedColumns": [
+    {
+      "name": "normalized_email",
+      "typeHint": "text"
+    },
+    {
+      "name": "account_count",
+      "typeHint": "integer"
+    },
+    {
+      "name": "customer_ids",
+      "typeHint": "text"
+    },
+    {
+      "name": "first_created_at",
+      "typeHint": "timestamp"
+    },
+    {
+      "name": "total_orders",
+      "typeHint": "integer"
+    }
+  ],
+  "orderMatters": false,
+  "referenceSql": "WITH order_counts AS (\n  SELECT customer_id, COUNT(*) AS order_count\n  FROM ecommerce.orders\n  GROUP BY customer_id\n)\nSELECT LOWER(c.email) AS normalized_email,\n       COUNT(*) AS account_count,\n       STRING_AGG(c.customer_id::text, ',' ORDER BY c.customer_id) AS customer_ids,\n       MIN(c.created_at) AS first_created_at,\n       COALESCE(SUM(oc.order_count), 0) AS total_orders\nFROM ecommerce.customers AS c\nLEFT JOIN order_counts AS oc ON oc.customer_id = c.customer_id\nGROUP BY LOWER(c.email)\nHAVING COUNT(*) > 1\nORDER BY normalized_email;\n",
+  "verificationSql": null,
+  "hints": [
+    "GROUP BY LOWER(email) and keep groups with HAVING COUNT(*) > 1.",
+    "STRING_AGG(customer_id::text, ',' ORDER BY customer_id) builds the id list in a deterministic order.",
+    "Pre aggregate orders per customer before joining, otherwise COUNT(*) on customers would be multiplied by the number of orders."
+  ],
+  "explanation": "Lower casing the email turns case variants into one key, and HAVING keeps only the collisions. Orders are counted per customer in a CTE before the join so each customer contributes exactly one row to the email group; a direct join would inflate account_count. The ordered STRING_AGG makes the id list reproducible for the merge job.",
+  "estimatedMinutes": 25
+}

@@ -1,0 +1,59 @@
+{
+  "key": "ecommerce-001",
+  "order": 1,
+  "title": "Top 10 product categories by net revenue in Q2 2026",
+  "track": "data_analyst",
+  "difficulty": "intermediate",
+  "topics": ["joins", "aggregation", "sorting_limiting"],
+  "datasetSlugs": ["ecommerce"],
+  "mode": "read",
+  "stakeholder": {
+    "name": "Julia Fischer",
+    "role": "Category Director",
+    "team": "Merchandising"
+  },
+  "businessContext": "Merchandising is planning the autumn range and wants to know which product categories carried the euro storefront last quarter. Julia needs the ten leaf categories with the highest net revenue in Q2 2026, with their parent department, the number of orders that contained them and the units sold. Cancelled orders never shipped and must be excluded.",
+  "requirements": [
+    "Use orders placed from 2026-04-01 00:00 UTC up to but excluding 2026-07-01 00:00 UTC, in currency EUR and with a status other than 'cancelled'.",
+    "Net revenue is the sum of order_items.line_total (already net of item discounts).",
+    "Report the leaf category of the product and its parent category (the department).",
+    "Return the 10 categories with the highest net revenue, highest first, breaking ties by category name."
+  ],
+  "acceptanceCriteria": [
+    "Exactly 10 rows sorted by net_revenue_eur descending.",
+    "Columns are department, category, orders, units_sold and net_revenue_eur, in that order.",
+    "orders counts distinct orders, not order lines."
+  ],
+  "expectedColumns": [
+    {
+      "name": "department",
+      "typeHint": "text"
+    },
+    {
+      "name": "category",
+      "typeHint": "text"
+    },
+    {
+      "name": "orders",
+      "typeHint": "integer"
+    },
+    {
+      "name": "units_sold",
+      "typeHint": "integer"
+    },
+    {
+      "name": "net_revenue_eur",
+      "typeHint": "decimal"
+    }
+  ],
+  "orderMatters": true,
+  "referenceSql": "SELECT parent.category_name AS department,\n       c.category_name AS category,\n       COUNT(DISTINCT o.order_id) AS orders,\n       SUM(i.quantity) AS units_sold,\n       SUM(i.line_total) AS net_revenue_eur\nFROM ecommerce.order_items AS i\nJOIN ecommerce.orders AS o ON o.order_id = i.order_id\nJOIN ecommerce.products AS p ON p.product_id = i.product_id\nJOIN ecommerce.categories AS c ON c.category_id = p.category_id\nJOIN ecommerce.categories AS parent ON parent.category_id = c.parent_category_id\nWHERE o.currency = 'EUR'\n  AND o.status <> 'cancelled'\n  AND o.ordered_at >= TIMESTAMPTZ '2026-04-01 00:00:00+00'\n  AND o.ordered_at < TIMESTAMPTZ '2026-07-01 00:00:00+00'\nGROUP BY parent.category_name, c.category_name\nORDER BY net_revenue_eur DESC, category\nLIMIT 10;\n",
+  "verificationSql": null,
+  "hints": [
+    "Products point to their leaf category; the department is the parent_category_id of that leaf, so join categories twice with different aliases.",
+    "Filter on the order (currency, status, ordered_at) but sum the line totals from order_items.",
+    "COUNT(DISTINCT o.order_id) avoids counting an order once per line."
+  ],
+  "explanation": "Joining categories to itself resolves the two level hierarchy. Filters belong to the order header while revenue and units come from the lines, and distinct order counting prevents inflation from multi line orders. ORDER BY with LIMIT 10 and a name tie breaker returns a stable top ten.",
+  "estimatedMinutes": 20
+}

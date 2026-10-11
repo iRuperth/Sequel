@@ -1,0 +1,54 @@
+{
+  "key": "web-001",
+  "order": 1,
+  "title": "Purchase conversion by traffic source for June 2026",
+  "track": "data_analyst",
+  "difficulty": "intermediate",
+  "topics": ["subqueries", "aggregation", "filtering", "conditional_logic"],
+  "datasetSlugs": ["web"],
+  "mode": "read",
+  "stakeholder": {
+    "name": "Mia Russo",
+    "role": "Growth Product Manager",
+    "team": "Growth"
+  },
+  "businessContext": "Growth is shifting budget between channels and Mia wants June 2026 conversion by traffic source on human traffic only. Automated clients are not filtered at collection time; they can be recognised by the user_agent_family values HeadlessChrome, python-requests, curl, Scrapy and PhantomJS. A session converts when it contains at least one purchase event.",
+  "requirements": [
+    "Use web.sessions started in June 2026 (UTC) and exclude the automated user agent families listed above.",
+    "A session is a purchasing session when web.events has at least one event_name = 'purchase' with the same session_id.",
+    "Return per traffic_source the number of sessions, the number of purchasing sessions and the conversion rate as a percentage rounded to 2 decimals."
+  ],
+  "acceptanceCriteria": [
+    "One row per traffic source.",
+    "Columns are traffic_source, sessions, purchasing_sessions and conversion_rate_pct, in that order.",
+    "A session with several purchase events is counted once."
+  ],
+  "expectedColumns": [
+    {
+      "name": "traffic_source",
+      "typeHint": "text"
+    },
+    {
+      "name": "sessions",
+      "typeHint": "integer"
+    },
+    {
+      "name": "purchasing_sessions",
+      "typeHint": "integer"
+    },
+    {
+      "name": "conversion_rate_pct",
+      "typeHint": "decimal"
+    }
+  ],
+  "orderMatters": false,
+  "referenceSql": "WITH human_sessions AS (\n  SELECT s.session_id,\n         s.traffic_source,\n         EXISTS (\n           SELECT 1\n           FROM web.events AS e\n           WHERE e.session_id = s.session_id\n             AND e.event_name = 'purchase'\n         ) AS purchased\n  FROM web.sessions AS s\n  WHERE s.started_at >= TIMESTAMPTZ '2026-06-01 00:00:00+00'\n    AND s.started_at < TIMESTAMPTZ '2026-07-01 00:00:00+00'\n    AND s.user_agent_family NOT IN ('HeadlessChrome', 'python-requests', 'curl', 'Scrapy', 'PhantomJS')\n)\nSELECT traffic_source,\n       COUNT(*) AS sessions,\n       COUNT(*) FILTER (WHERE purchased) AS purchasing_sessions,\n       ROUND(100.0 * COUNT(*) FILTER (WHERE purchased) / COUNT(*), 2) AS conversion_rate_pct\nFROM human_sessions\nGROUP BY traffic_source\nORDER BY traffic_source;\n",
+  "verificationSql": null,
+  "hints": [
+    "There is no foreign key between events and sessions, but both carry session_id.",
+    "An EXISTS subquery per session returns true once, however many purchase events the session has.",
+    "Count all sessions and the purchasing ones with COUNT(*) FILTER (WHERE purchased), then divide using 100.0."
+  ],
+  "explanation": "Computing a boolean per session with EXISTS avoids the row multiplication a join to events would cause. Excluding the automation user agents removes scraper sessions that inflate the denominator, and conditional aggregation produces sessions, conversions and the rate in a single grouped pass.",
+  "estimatedMinutes": 20
+}
