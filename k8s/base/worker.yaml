@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sequel-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: worker
+    spec:
+      containers:
+        - name: worker
+          image: sequel-worker
+          ports:
+            - name: health
+              containerPort: 4041
+          envFrom:
+            - configMapRef:
+                name: sequel-config
+            - secretRef:
+                name: sequel-secrets
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: health
+            periodSeconds: 15
+            failureThreshold: 4
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi

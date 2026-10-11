@@ -1,0 +1,35 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+images:
+  - name: sequel-api
+    newName: registry.example.com/sequel/api
+    newTag: "0.1.0"
+  - name: sequel-worker
+    newName: registry.example.com/sequel/worker
+    newTag: "0.1.0"
+  - name: sequel-web
+    newName: registry.example.com/sequel/web
+    newTag: "0.1.0"
+  - name: sequel-cli
+    newName: registry.example.com/sequel/cli
+    newTag: "0.1.0"
+replicas:
+  - name: sequel-api
+    count: 2
+  - name: sequel-web
+    count: 2
+  - name: sequel-worker
+    count: 2
+patches:
+  - path: ingress-host.yaml
+  - target:
+      kind: Secret
+      name: sequel-secrets
+    patch: |-
+      $patch: delete
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: sequel-secrets
