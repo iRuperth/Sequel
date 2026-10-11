@@ -1,0 +1,223 @@
+queries:
+  - key: payments-daily-settled-volume
+    name: Daily settled card volume (EUR), last 90 days
+    description: >-
+      Settled card purchases on euro cards per UTC day for the 90 days before the latest authorisation in the
+      feed. Used by the payments overview line chart.
+    datasetSlug: fintech
+    tags:
+      - payments
+      - volume
+      - daily
+    sqlText: |
+      WITH bounds AS (
+        SELECT MAX(created_at) AS as_of FROM fintech.transactions
+      )
+      SELECT (t.created_at AT TIME ZONE 'UTC')::date AS day,
+             COUNT(*) AS settled_purchases,
+             SUM(t.billing_amount) AS settled_volume_eur
+      FROM fintech.transactions AS t
+      CROSS JOIN bounds AS b
+      WHERE t.status = 'settled'
+        AND t.transaction_type = 'purchase'
+        AND t.billing_currency = 'EUR'
+        AND t.created_at > b.as_of - INTERVAL '90 days'
+      GROUP BY 1
+      ORDER BY 1;
+
+  - key: payments-settled-volume-30d
+    name: Settled EUR card volume, last 30 days
+    description: >-
+      Single row KPI with the settled purchase volume on euro cards over the 30 days before the latest
+      authorisation.
+    datasetSlug: fintech
+    tags:
+      - payments
+      - kpi
+    sqlText: |
+      WITH bounds AS (
+        SELECT MAX(created_at) AS as_of FROM fintech.transactions
+      )
+      SELECT COUNT(*) AS settled_purchases,
+             SUM(t.billing_amount) AS settled_volume_eur
+      FROM fintech.transactions AS t
+      CROSS JOIN bounds AS b
+      WHERE t.status = 'settled'
+        AND t.transaction_type = 'purchase'
+        AND t.billing_currency = 'EUR'
+        AND t.created_at > b.as_of - INTERVAL '30 days';
+
+  - key: payments-approval-rate-30d
+    name: Card approval rate, last 30 days
+    description: >-
+      Share of purchase authorisations that were approved (settled or still authorised) over the last 30 days of
+      data. approval_rate is a ratio between 0 and 1.
+    datasetSlug: fintech
+    tags:
+      - payments
+      - kpi
+      - authorisation
+    sqlText: |
+      WITH bounds AS (
+        SELECT MAX(created_at) AS as_of FROM fintech.transactions
+      )
+      SELECT COUNT(*) AS authorisations,
+             COUNT(*) FILTER (WHERE t.status IN ('settled', 'authorized')) AS approved,
+             ROUND(COUNT(*) FILTER (WHERE t.status IN ('settled', 'authorized'))::numeric / COUNT(*), 4) AS approval_rate
+      FROM fintech.transactions AS t
+      CROSS JOIN bounds AS b
+      WHERE t.transaction_type = 'purchase'
+        AND t.created_at > b.as_of - INTERVAL '30 days';
+
+  - key: payments-active-cards-monthly
+    name: Monthly active cards
+    description: >-
+      Distinct cards with at least one settled purchase per calendar month, with the number of purchases they
+      made. Shows customer engagement growth.
+    datasetSlug: fintech
+    tags:
+      - cards
+      - engagement
+      - monthly
+    sqlText: |
+      SELECT DATE_TRUNC('month', created_at AT TIME ZONE 'UTC')::date AS month,
+             COUNT(DISTINCT card_id) AS active_cards,
+             COUNT(*) AS settled_purchases
+      FROM fintech.transactions
+      WHERE status = 'settled'
+        AND transaction_type = 'purchase'
+      GROUP BY 1
+      ORDER BY 1;
+
+  - key: payments-category-mix-30d
+    name: Spend by merchant category group, last 30 days
+    description: >-
+      Settled EUR purchase volume by category group over the last 30 days, using the network MCC so unmapped
+      merchants are included.
+    datasetSlug: fintech
+    tags:
+      - payments
+      - merchants
+      - mix
+    sqlText: |
+      WITH bounds AS (
+        SELECT MAX(created_at) AS as_of FROM fintech.transactions
+      )
+      SELECT mc.category_group,
+             COUNT(*) AS settled_purchases,
+             SUM(t.billing_amount) AS settled_volume_eur
+      FROM fintech.transactions AS t
+      JOIN fintech.merchant_categories AS mc ON mc.mcc = t.mcc
+      CROSS JOIN bounds AS b
+      WHERE t.status = 'settled'
+        AND t.transaction_type = 'purchase'
+        AND t.billing_currency = 'EUR'
+        AND t.created_at > b.as_of - INTERVAL '30 days'
+      GROUP BY mc.category_group
+      ORDER BY settled_volume_eur DESC, mc.category_group;
+
+  - key: payments-top-merchants-30d
+    name: Top merchants by settled EUR volume, last 30 days
+    description: >-
+      The 15 merchants with the highest settled purchase volume on euro cards over the last 30 days, with their
+      category and decline rate.
+    datasetSlug: fintech
+    tags:
+      - payments
+      - merchants
+    sqlText: |
+      WITH bounds AS (
+        SELECT MAX(created_at) AS as_of FROM fintech.transactions
+      )
+      SELECT m.merchant_name,
+             mc.category_name,
+             COUNT(*) FILTER (WHERE t.status = 'settled') AS settled_purchases,
+             SUM(t.billing_amount) FILTER (WHERE t.status = 'settled') AS settled_volume_eur,
+             ROUND(COUNT(*) FILTER (WHERE t.status = 'declined')::numeric / COUNT(*), 4) AS decline_rate
+      FROM fintech.transactions AS t
+      JOIN fintech.merchants AS m ON m.merchant_id = t.merchant_id
+      JOIN fintech.merchant_categories AS mc ON mc.mcc = m.mcc
+      CROSS JOIN bounds AS b
+      WHERE t.transaction_type = 'purchase'
+        AND t.billing_currency = 'EUR'
+        AND t.created_at > b.as_of - INTERVAL '30 days'
+      GROUP BY m.merchant_id, m.merchant_name, mc.category_name
+      ORDER BY settled_volume_eur DESC NULLS LAST, m.merchant_id
+      LIMIT 15;
+
+  - key: risk-fraud-alerts-by-rule
+    name: Fraud alerts by rule, last 90 days
+    description: >-
+      Alerts raised per fraud rule over the last 90 days of data and how many were confirmed as fraud. Helps the
+      fraud strategy team tune noisy rules.
+    datasetSlug: fintech
+    tags:
+      - risk
+      - fraud
+    sqlText: |
+      WITH bounds AS (
+        SELECT MAX(created_at) AS as_of FROM fintech.fraud_alerts
+      )
+      SELECT a.rule_code,
+             a.rule_name,
+             COUNT(*) AS alerts,
+             COUNT(*) FILTER (WHERE a.status = 'confirmed_fraud') AS confirmed_fraud,
+             COUNT(*) FILTER (WHERE a.status IN ('open', 'investigating')) AS still_open
+      FROM fintech.fraud_alerts AS a
+      CROSS JOIN bounds AS b
+      WHERE a.created_at > b.as_of - INTERVAL '90 days'
+      GROUP BY a.rule_code, a.rule_name
+      ORDER BY alerts DESC, a.rule_code;
+
+  - key: risk-open-disputes
+    name: Open card disputes
+    description: >-
+      Single row KPI with the number of disputes still open or under review and the disputed amount on euro cards.
+    datasetSlug: fintech
+    tags:
+      - risk
+      - disputes
+      - kpi
+    sqlText: |
+      SELECT COUNT(*) AS open_disputes,
+             COALESCE(SUM(disputed_amount) FILTER (WHERE currency = 'EUR'), 0) AS open_disputed_amount_eur
+      FROM fintech.disputes
+      WHERE status IN ('open', 'under_review');
+
+  - key: credit-loan-book-by-status
+    name: Loan book by status
+    description: >-
+      Number of loans and original principal by product and status, in each loan currency. Gives credit risk a
+      quick view of the book.
+    datasetSlug: fintech
+    tags:
+      - lending
+      - credit
+    sqlText: |
+      SELECT product,
+             status,
+             currency,
+             COUNT(*) AS loans,
+             SUM(principal) AS principal
+      FROM fintech.loans
+      GROUP BY product, status, currency
+      ORDER BY product, status, currency;
+
+  - key: ecommerce-monthly-revenue
+    name: Online store monthly net revenue (EUR orders)
+    description: >-
+      Orders and net revenue per month for the euro storefront, excluding cancelled orders.
+    datasetSlug: ecommerce
+    tags:
+      - ecommerce
+      - revenue
+      - monthly
+    sqlText: |
+      SELECT DATE_TRUNC('month', ordered_at AT TIME ZONE 'UTC')::date AS month,
+             COUNT(*) AS orders,
+             SUM(subtotal_amount - discount_amount) AS net_revenue_eur
+      FROM ecommerce.orders
+      WHERE currency = 'EUR'
+        AND status <> 'cancelled'
+      GROUP BY 1
+      ORDER BY 1;

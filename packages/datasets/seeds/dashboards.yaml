@@ -1,0 +1,119 @@
+dashboards:
+  - key: payments-overview
+    name: Payments overview
+    description: >-
+      Daily health of the card business for the payments operations stand up: settled volume, approval rate,
+      disputes and where customers spend.
+    widgets:
+      - title: Settled EUR volume, last 30 days
+        kind: kpi
+        savedQueryKey: payments-settled-volume-30d
+        config:
+          xColumn: null
+          yColumns: []
+          valueColumn: settled_volume_eur
+          format: currency
+          currency: EUR
+        position: { x: 0, y: 0, w: 4, h: 2 }
+      - title: Approval rate, last 30 days
+        kind: kpi
+        savedQueryKey: payments-approval-rate-30d
+        config:
+          xColumn: null
+          yColumns: []
+          valueColumn: approval_rate
+          format: percent
+          currency: null
+        position: { x: 4, y: 0, w: 4, h: 2 }
+      - title: Open disputes
+        kind: kpi
+        savedQueryKey: risk-open-disputes
+        config:
+          xColumn: null
+          yColumns: []
+          valueColumn: open_disputes
+          format: number
+          currency: null
+        position: { x: 8, y: 0, w: 4, h: 2 }
+      - title: Daily settled EUR volume
+        kind: line
+        savedQueryKey: payments-daily-settled-volume
+        config:
+          xColumn: day
+          yColumns:
+            - settled_volume_eur
+          valueColumn: null
+          format: currency
+          currency: EUR
+        position: { x: 0, y: 2, w: 8, h: 4 }
+      - title: Spend by category group, last 30 days
+        kind: bar
+        savedQueryKey: payments-category-mix-30d
+        config:
+          xColumn: category_group
+          yColumns:
+            - settled_volume_eur
+          valueColumn: null
+          format: currency
+          currency: EUR
+        position: { x: 8, y: 2, w: 4, h: 4 }
+      - title: Monthly active cards
+        kind: area
+        savedQueryKey: payments-active-cards-monthly
+        config:
+          xColumn: month
+          yColumns:
+            - active_cards
+          valueColumn: null
+          format: number
+          currency: null
+        position: { x: 0, y: 6, w: 6, h: 4 }
+      - title: Top merchants, last 30 days
+        kind: table
+        savedQueryKey: payments-top-merchants-30d
+        config:
+          xColumn: null
+          yColumns: []
+          valueColumn: null
+          format: currency
+          currency: EUR
+        position: { x: 6, y: 6, w: 6, h: 4 }
+
+  - key: risk-and-credit
+    name: Risk and credit
+    description: >-
+      Weekly view for the risk committee: fraud rule performance, open disputes and the state of the consumer
+      lending book.
+    widgets:
+      - title: Fraud alerts by rule, last 90 days
+        kind: bar
+        savedQueryKey: risk-fraud-alerts-by-rule
+        config:
+          xColumn: rule_code
+          yColumns:
+            - alerts
+            - confirmed_fraud
+          valueColumn: null
+          format: number
+          currency: null
+        position: { x: 0, y: 0, w: 7, h: 4 }
+      - title: Open disputed amount (EUR cards)
+        kind: kpi
+        savedQueryKey: risk-open-disputes
+        config:
+          xColumn: null
+          yColumns: []
+          valueColumn: open_disputed_amount_eur
+          format: currency
+          currency: EUR
+        position: { x: 7, y: 0, w: 5, h: 2 }
+      - title: Loan book by status
+        kind: table
+        savedQueryKey: credit-loan-book-by-status
+        config:
+          xColumn: null
+          yColumns: []
+          valueColumn: null
+          format: number
+          currency: null
+        position: { x: 7, y: 2, w: 5, h: 4 }
