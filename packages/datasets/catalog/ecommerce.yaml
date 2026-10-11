@@ -1,0 +1,412 @@
+dataset: ecommerce
+tables:
+  - name: customers
+    description: >-
+      Registered shoppers of the online store. Known issue: before the sign up flow was fixed, emails were stored
+      as typed, so a small number of shoppers registered twice with the same address in different casing.
+      loyalty_tier is recalculated nightly from the number of orders.
+    grain: One row per customer account
+    ownerTeam: Customer Data Platform
+    tags: [customers, crm, pii]
+    columns:
+      - name: customer_id
+        description: Surrogate key of the customer account.
+        pii: false
+      - name: email
+        description: Login email as entered at sign up. Compare with LOWER() when deduplicating.
+        pii: true
+      - name: first_name
+        description: First name given at sign up.
+        pii: true
+      - name: last_name
+        description: Last name given at sign up.
+        pii: true
+      - name: phone_number
+        description: Phone number for delivery notifications. Null when not provided.
+        pii: true
+      - name: country_code
+        description: ISO 3166 alpha 2 country of the customer. Determines the storefront currency.
+        pii: false
+        exampleValues: [DE, FR, GB]
+      - name: city
+        description: City of the default address.
+        pii: false
+      - name: loyalty_tier
+        description: Loyalty tier based on lifetime orders.
+        pii: false
+        exampleValues: [none, silver, gold, platinum]
+      - name: marketing_opt_in
+        description: True when the customer accepted marketing emails.
+        pii: false
+      - name: created_at
+        description: Timestamp (UTC) of account creation.
+        pii: false
+      - name: last_login_at
+        description: Timestamp (UTC) of the last login. Null when not tracked.
+        pii: false
+
+  - name: addresses
+    description: Shipping and billing addresses saved by customers. The first default shipping address is used for new orders.
+    grain: One row per saved address
+    ownerTeam: Customer Data Platform
+    tags: [customers, addresses, pii]
+    columns:
+      - name: address_id
+        description: Surrogate key of the address.
+        pii: false
+      - name: customer_id
+        description: Customer who saved the address.
+        pii: false
+      - name: address_type
+        description: Use of the address.
+        pii: false
+        exampleValues: [shipping, billing]
+      - name: street_line
+        description: Street and house number.
+        pii: true
+      - name: city
+        description: City.
+        pii: false
+      - name: postal_code
+        description: Postal code in the local format of the country.
+        pii: true
+      - name: country_code
+        description: ISO 3166 alpha 2 country.
+        pii: false
+      - name: is_default
+        description: True for the default address of its type.
+        pii: false
+      - name: created_at
+        description: Timestamp (UTC) when the address was saved.
+        pii: false
+
+  - name: categories
+    description: Two level product taxonomy. Top level rows are departments with a null parent; leaf categories point to their department.
+    grain: One row per category node
+    ownerTeam: Merchandising
+    tags: [catalogue, reference]
+    columns:
+      - name: category_id
+        description: Surrogate key of the category.
+        pii: false
+      - name: parent_category_id
+        description: Department of a leaf category. Null for departments.
+        pii: false
+      - name: category_name
+        description: Display name.
+        pii: false
+        exampleValues: [Electronics, Headphones and Audio]
+      - name: slug
+        description: URL slug used on the website.
+        pii: false
+        exampleValues: [headphones-audio]
+
+  - name: products
+    description: Product catalogue with list prices in euro. Discontinued products are kept with is_active false so historical orders still join.
+    grain: One row per sellable product (SKU)
+    ownerTeam: Merchandising
+    tags: [catalogue, products]
+    columns:
+      - name: product_id
+        description: Surrogate key of the product.
+        pii: false
+      - name: sku
+        description: Stock keeping unit code.
+        pii: false
+        exampleValues: [SKU-0100007]
+      - name: product_name
+        description: Product name shown on the website.
+        pii: false
+      - name: category_id
+        description: Leaf category of the product.
+        pii: false
+      - name: brand
+        description: Brand name.
+        pii: false
+      - name: unit_price
+        description: Current list price in the catalogue currency (EUR), excluding VAT.
+        pii: false
+      - name: unit_cost
+        description: Landed unit cost used for margin reporting.
+        pii: false
+      - name: currency
+        description: Catalogue currency, always EUR. Orders in other storefronts are priced from it.
+        pii: false
+      - name: weight_grams
+        description: Shipping weight in grams.
+        pii: false
+      - name: is_active
+        description: False for discontinued products.
+        pii: false
+      - name: launched_at
+        description: Timestamp (UTC) when the product went live.
+        pii: false
+
+  - name: inventory
+    description: Stock snapshot per product and fulfilment warehouse at the end of the snapshot day.
+    grain: One row per product and warehouse
+    ownerTeam: Fulfilment Operations
+    tags: [inventory, fulfilment]
+    columns:
+      - name: product_id
+        description: Product held in stock.
+        pii: false
+      - name: warehouse_code
+        description: Fulfilment warehouse code.
+        pii: false
+        exampleValues: [AMS1, BER1, MAD1, LHR1]
+      - name: quantity_on_hand
+        description: Units physically in the warehouse.
+        pii: false
+      - name: quantity_reserved
+        description: Units reserved for orders not yet picked.
+        pii: false
+      - name: reorder_point
+        description: Level below which the replenishment job raises a purchase order.
+        pii: false
+      - name: updated_at
+        description: Timestamp (UTC) of the last stock movement.
+        pii: false
+
+  - name: promotions
+    description: Promotion codes run by the marketing team. The welcome code is always on, seasonal codes run for a few days or weeks.
+    grain: One row per promotion code
+    ownerTeam: Commerce Analytics
+    tags: [marketing, promotions]
+    columns:
+      - name: promotion_id
+        description: Surrogate key of the promotion.
+        pii: false
+      - name: promo_code
+        description: Code entered at checkout.
+        pii: false
+        exampleValues: [WELCOME10, BLACKFRIDAY25]
+      - name: description
+        description: Internal description of the campaign.
+        pii: false
+      - name: discount_type
+        description: How the discount is applied.
+        pii: false
+        exampleValues: [percent, fixed_amount, free_shipping]
+      - name: discount_value
+        description: Percentage or fixed amount in EUR depending on discount_type. Zero for free shipping.
+        pii: false
+      - name: min_order_amount
+        description: Minimum basket value in EUR to use the code. Null when there is no minimum.
+        pii: false
+      - name: starts_at
+        description: Timestamp (UTC) when the code became valid.
+        pii: false
+      - name: ends_at
+        description: Timestamp (UTC) when the code expired. Null for open ended codes.
+        pii: false
+
+  - name: orders
+    description: >-
+      Customer orders placed on the website, apps and marketplaces. Amounts are in the storefront currency of the
+      customer. status reflects the furthest fulfilment step reached at the snapshot.
+    grain: One row per order
+    ownerTeam: Commerce Analytics
+    tags: [orders, sales]
+    columns:
+      - name: order_id
+        description: Surrogate key of the order, increasing with ordered_at.
+        pii: false
+      - name: order_number
+        description: Order reference shown to the customer.
+        pii: false
+        exampleValues: [SO-2026-0100003]
+      - name: customer_id
+        description: Customer who placed the order.
+        pii: false
+      - name: shipping_address_id
+        description: Delivery address.
+        pii: false
+      - name: promotion_id
+        description: Promotion code applied. Null when no code was used.
+        pii: false
+      - name: status
+        description: Fulfilment status of the order.
+        pii: false
+        exampleValues: [pending_payment, paid, shipped, delivered, cancelled, returned]
+      - name: sales_channel
+        description: Channel where the order was placed.
+        pii: false
+        exampleValues: [web, ios_app, android_app, marketplace]
+      - name: currency
+        description: Storefront currency of all amounts on the order.
+        pii: false
+        exampleValues: [EUR, GBP, USD]
+      - name: subtotal_amount
+        description: Sum of unit price times quantity before discounts.
+        pii: false
+      - name: discount_amount
+        description: Total promotion discount.
+        pii: false
+      - name: shipping_amount
+        description: Shipping fee charged. Zero for free shipping.
+        pii: false
+      - name: tax_amount
+        description: VAT charged on the discounted subtotal.
+        pii: false
+      - name: total_amount
+        description: Amount charged to the customer, subtotal minus discount plus shipping plus tax.
+        pii: false
+      - name: ordered_at
+        description: Timestamp (UTC) when the order was placed.
+        pii: false
+
+  - name: order_items
+    description: Lines of each order. line_total is net of the line discount and excludes VAT and shipping.
+    grain: One row per order line
+    ownerTeam: Commerce Analytics
+    tags: [orders, sales]
+    columns:
+      - name: order_item_id
+        description: Surrogate key of the line.
+        pii: false
+      - name: order_id
+        description: Order the line belongs to.
+        pii: false
+      - name: line_number
+        description: Position of the line within the order, starting at 1.
+        pii: false
+      - name: product_id
+        description: Product sold.
+        pii: false
+      - name: quantity
+        description: Units ordered.
+        pii: false
+      - name: unit_price
+        description: Unit price in the order currency at the time of the order.
+        pii: false
+      - name: discount_amount
+        description: Discount applied to the line.
+        pii: false
+      - name: line_total
+        description: unit_price times quantity minus discount_amount.
+        pii: false
+
+  - name: payments
+    description: >-
+      Payment attempts sent to the payment service provider. Failed attempts are kept, so an order can have more
+      than one row. Known issue: some bank transfers and a few card payments were captured weeks after the order.
+    grain: One row per payment attempt
+    ownerTeam: Commerce Analytics
+    tags: [payments, orders]
+    columns:
+      - name: payment_id
+        description: Surrogate key of the attempt.
+        pii: false
+      - name: order_id
+        description: Order being paid.
+        pii: false
+      - name: payment_method
+        description: Payment method chosen at checkout.
+        pii: false
+        exampleValues: [card, digital_wallet, pay_later, bank_transfer, gift_card]
+      - name: provider_reference
+        description: Reference of the attempt at the payment service provider.
+        pii: false
+      - name: amount
+        description: Amount requested, equal to the order total.
+        pii: false
+      - name: currency
+        description: Currency of amount.
+        pii: false
+      - name: status
+        description: Status of the attempt. refunded applies to cancelled orders.
+        pii: false
+        exampleValues: [pending, authorized, captured, failed, refunded]
+      - name: attempted_at
+        description: Timestamp (UTC) of the payment attempt.
+        pii: false
+      - name: captured_at
+        description: Timestamp (UTC) when funds were captured. Null when not captured.
+        pii: false
+
+  - name: shipments
+    description: >-
+      Parcels handed to carriers. Known issue: the carrier integration did not send the pickup scan for a small
+      share of delivered parcels, so shipped_at is null although delivered_at is set.
+    grain: One row per shipment
+    ownerTeam: Fulfilment Operations
+    tags: [fulfilment, logistics]
+    columns:
+      - name: shipment_id
+        description: Surrogate key of the shipment.
+        pii: false
+      - name: order_id
+        description: Order shipped.
+        pii: false
+      - name: warehouse_code
+        description: Warehouse that packed the parcel.
+        pii: false
+      - name: carrier
+        description: Carrier transporting the parcel.
+        pii: false
+        exampleValues: [SwiftParcel, EuroExpress Logistics]
+      - name: service_level
+        description: Delivery promise bought by the customer.
+        pii: false
+        exampleValues: [standard, express, next_day]
+      - name: tracking_number
+        description: Carrier tracking number.
+        pii: false
+      - name: status
+        description: Latest tracking status.
+        pii: false
+        exampleValues: [label_created, in_transit, delivered, returned_to_sender, lost]
+      - name: created_at
+        description: Timestamp (UTC) when the shipping label was created.
+        pii: false
+      - name: shipped_at
+        description: Timestamp (UTC) of the carrier pickup scan. Null before pickup or when the scan is missing.
+        pii: false
+      - name: delivered_at
+        description: Timestamp (UTC) of delivery. Null until delivered.
+        pii: false
+
+  - name: returns
+    description: >-
+      Customer return requests per order line and their refund. Known issue: a handful of returns record more units
+      than were ordered on the line because the warehouse keyed the quantity manually.
+    grain: One row per return request
+    ownerTeam: Fulfilment Operations
+    tags: [returns, fulfilment]
+    columns:
+      - name: return_id
+        description: Surrogate key of the return.
+        pii: false
+      - name: order_id
+        description: Order of the returned line.
+        pii: false
+      - name: order_item_id
+        description: Returned order line.
+        pii: false
+      - name: quantity
+        description: Units returned.
+        pii: false
+      - name: reason
+        description: Return reason selected by the customer.
+        pii: false
+        exampleValues: [wrong_size, changed_mind, damaged_in_transit]
+      - name: status
+        description: Processing status of the return.
+        pii: false
+        exampleValues: [requested, received, refunded, rejected]
+      - name: refund_amount
+        description: Amount refunded in the order currency. Null until refunded and for rejected returns.
+        pii: false
+      - name: requested_at
+        description: Timestamp (UTC) of the return request.
+        pii: false
+      - name: processed_at
+        description: Timestamp (UTC) when the return was refunded or rejected.
+        pii: false
+links:
+  - fromTable: order_items
+    fromColumn: product_id
+    toTable: inventory
+    toColumn: product_id
+    description: Stock for the product sold, one row per warehouse.

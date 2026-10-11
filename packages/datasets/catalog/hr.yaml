@@ -1,0 +1,277 @@
+dataset: hr
+tables:
+  - name: locations
+    description: Offices and remote hubs of the company. Every employee is attached to one location for payroll and tax purposes.
+    grain: One row per office or hub
+    ownerTeam: People Systems
+    tags: [workplace, reference]
+    columns:
+      - name: location_id
+        description: Surrogate key of the location.
+        pii: false
+      - name: office_name
+        description: Internal name of the office.
+        pii: false
+        exampleValues: [Berlin Headquarters, Lisbon Hub]
+      - name: city
+        description: City of the office.
+        pii: false
+      - name: country_code
+        description: ISO 3166 alpha 2 country, which determines the payroll currency.
+        pii: false
+      - name: region
+        description: Reporting region.
+        pii: false
+        exampleValues: [EMEA, AMER, APAC]
+      - name: is_remote_hub
+        description: True for hubs that mainly host remote employees.
+        pii: false
+      - name: opened_on
+        description: Date the location opened.
+        pii: false
+
+  - name: departments
+    description: >-
+      Organisation chart. Divisions report to the Executive Office and departments report to their division.
+      cost_center_code matches finance.cost_centers.cost_center_code for cost allocation.
+    grain: One row per department or division
+    ownerTeam: People Systems
+    tags: [organisation, reference]
+    columns:
+      - name: department_id
+        description: Surrogate key of the department.
+        pii: false
+      - name: department_name
+        description: Department name.
+        pii: false
+        exampleValues: [Platform Engineering, Customer Support]
+      - name: parent_department_id
+        description: Parent department or division. Null for the Executive Office.
+        pii: false
+      - name: cost_center_code
+        description: Finance cost center charged with the department costs.
+        pii: false
+        exampleValues: [CC-2100]
+      - name: head_employee_id
+        description: Employee who leads the department.
+        pii: false
+
+  - name: employees
+    description: >-
+      Current and former employees from the HR information system. Leavers keep their record with a termination
+      date. job_title and job_level describe the current or last role.
+    grain: One row per employee (person hired)
+    ownerTeam: People Analytics
+    tags: [people, workforce, pii, sensitive]
+    columns:
+      - name: employee_id
+        description: Surrogate key of the employee, increasing with hire date.
+        pii: false
+      - name: employee_number
+        description: Employee number used by payroll.
+        pii: false
+        exampleValues: [E010001]
+      - name: first_name
+        description: Legal first name.
+        pii: true
+      - name: last_name
+        description: Legal last name.
+        pii: true
+      - name: work_email
+        description: Corporate email address.
+        pii: true
+      - name: date_of_birth
+        description: Date of birth.
+        pii: true
+      - name: hire_date
+        description: First working day.
+        pii: false
+      - name: termination_date
+        description: Last working day. Null for current employees.
+        pii: false
+      - name: termination_reason
+        description: Reason for leaving. Null for current employees.
+        pii: false
+        exampleValues: [resignation, dismissal, redundancy, retirement, contract_end]
+      - name: department_id
+        description: Current or last department.
+        pii: false
+      - name: location_id
+        description: Payroll location.
+        pii: false
+      - name: manager_id
+        description: Direct manager. Null for the chief executive.
+        pii: false
+      - name: job_title
+        description: Current or last job title.
+        pii: false
+        exampleValues: [Senior Software Engineer, Customer Support Specialist]
+      - name: job_level
+        description: Career level from L1 (entry) to L8 (executive).
+        pii: false
+        exampleValues: [L2, L4, L7]
+      - name: employment_type
+        description: Contract type.
+        pii: false
+        exampleValues: [full_time, part_time, contractor]
+      - name: status
+        description: Employment status at the snapshot.
+        pii: false
+        exampleValues: [active, on_leave, terminated]
+
+  - name: employment_history
+    description: >-
+      Role history of each employee: one row per period in a role, opened by a hire, promotion, transfer or
+      reorganisation. A null end_date marks the current period. Known issue: a handful of employees have periods
+      that overlap because a correction in the HR system did not close the previous row.
+    grain: One row per employee and role period
+    ownerTeam: People Systems
+    tags: [people, history, scd]
+    columns:
+      - name: history_id
+        description: Surrogate key of the period.
+        pii: false
+      - name: employee_id
+        description: Employee.
+        pii: false
+      - name: department_id
+        description: Department during the period.
+        pii: false
+      - name: job_title
+        description: Job title during the period.
+        pii: false
+      - name: job_level
+        description: Career level during the period.
+        pii: false
+      - name: start_date
+        description: First day of the period.
+        pii: false
+      - name: end_date
+        description: Last day of the period, inclusive. Null for the current period.
+        pii: false
+      - name: change_reason
+        description: Event that opened the period.
+        pii: false
+        exampleValues: [hire, promotion, transfer, reorganisation, title_change]
+
+  - name: salaries
+    description: >-
+      Base salary history. A new row starts at hire, on every annual review (effective 1 April), on promotions and on
+      market adjustments. Salaries are annual gross amounts in the payroll currency of the location. Confidential:
+      restricted to compensation analytics.
+    grain: One row per employee and salary period
+    ownerTeam: People Analytics
+    tags: [compensation, sensitive]
+    columns:
+      - name: salary_id
+        description: Surrogate key of the salary period.
+        pii: false
+      - name: employee_id
+        description: Employee.
+        pii: false
+      - name: effective_from
+        description: First day the salary applies.
+        pii: false
+      - name: effective_to
+        description: Last day the salary applies. Null for the current salary.
+        pii: false
+      - name: base_salary
+        description: Annual gross base salary.
+        pii: false
+      - name: currency
+        description: Payroll currency.
+        pii: false
+        exampleValues: [EUR, GBP, PLN, USD]
+      - name: bonus_target_pct
+        description: Target bonus as a percentage of base salary.
+        pii: false
+      - name: change_reason
+        description: Event that triggered the salary change.
+        pii: false
+        exampleValues: [hire, annual_review, promotion, market_adjustment]
+
+  - name: performance_reviews
+    description: >-
+      Half yearly performance reviews. Ratings go from 1 (does not meet expectations) to 5 (exceptional). The
+      calibrated rating is set by the calibration committee and is null while calibration of the latest cycle is open.
+      Contractors are not reviewed.
+    grain: One row per employee and review cycle
+    ownerTeam: People Analytics
+    tags: [performance, sensitive]
+    columns:
+      - name: review_id
+        description: Surrogate key of the review.
+        pii: false
+      - name: employee_id
+        description: Employee reviewed.
+        pii: false
+      - name: reviewer_id
+        description: Manager who wrote the review.
+        pii: false
+      - name: review_period
+        description: Review cycle label.
+        pii: false
+        exampleValues: [2025-H1, 2025-H2]
+      - name: period_end
+        description: Last day of the review cycle.
+        pii: false
+      - name: self_rating
+        description: Rating the employee gave themselves. Null when the self review was skipped.
+        pii: false
+      - name: manager_rating
+        description: Rating proposed by the manager.
+        pii: false
+      - name: calibrated_rating
+        description: Final rating after calibration. Null while calibration is open.
+        pii: false
+      - name: submitted_at
+        description: Timestamp (UTC) when the manager submitted the review.
+        pii: false
+
+  - name: leave_requests
+    description: >-
+      Time off requests and their approval. working_days excludes weekends; half days are possible. Approved
+      requests can start after the snapshot date.
+    grain: One row per leave request
+    ownerTeam: People Systems
+    tags: [time_off, workforce]
+    columns:
+      - name: leave_request_id
+        description: Surrogate key of the request.
+        pii: false
+      - name: employee_id
+        description: Employee requesting leave.
+        pii: false
+      - name: leave_type
+        description: Type of leave.
+        pii: false
+        exampleValues: [annual, sick, parental, unpaid, bereavement, study]
+      - name: start_date
+        description: First day of leave.
+        pii: false
+      - name: end_date
+        description: Last day of leave, inclusive.
+        pii: false
+      - name: working_days
+        description: Working days of leave requested.
+        pii: false
+      - name: status
+        description: Approval status.
+        pii: false
+        exampleValues: [pending, approved, rejected, cancelled]
+      - name: requested_at
+        description: Timestamp (UTC) of the request.
+        pii: false
+      - name: decided_by
+        description: Manager who approved or rejected the request. Null while pending.
+        pii: false
+      - name: decided_at
+        description: Timestamp (UTC) of the decision. Null while pending.
+        pii: false
+links:
+  - fromTable: departments
+    fromColumn: cost_center_code
+    toSchema: finance
+    toTable: cost_centers
+    toColumn: cost_center_code
+    description: Department costs are charged to the finance cost center with the same code.
