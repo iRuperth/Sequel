@@ -1,0 +1,63 @@
+{
+  "key": "fintech-008",
+  "order": 8,
+  "title": "Rewrite the top merchants panel query without correlated subqueries",
+  "track": "data_engineer",
+  "difficulty": "advanced",
+  "topics": ["query_optimisation", "aggregation", "joins", "conditional_logic"],
+  "datasetSlugs": ["fintech"],
+  "mode": "read",
+  "stakeholder": {
+    "name": "Elif Yamamoto",
+    "role": "Staff Data Engineer",
+    "team": "Data Platform Reliability"
+  },
+  "businessContext": "The Top merchants panel on the payments ops dashboard runs five correlated subqueries per merchant and is one of the most expensive statements in our query logs. Elif wants it rewritten as a single aggregation over fintech.transactions that returns exactly the same result. This is the current query: SELECT m.merchant_id, m.merchant_name, (SELECT COUNT(*) FROM fintech.transactions t WHERE t.merchant_id = m.merchant_id AND t.status = 'settled' AND t.created_at >= '2026-05-01' AND t.created_at < '2026-06-01') AS settled_count, (SELECT COUNT(*) FROM fintech.transactions t WHERE t.merchant_id = m.merchant_id AND t.status = 'declined' AND t.created_at >= '2026-05-01' AND t.created_at < '2026-06-01') AS declined_count, ROUND(100.0 * (SELECT COUNT(*) FROM fintech.transactions t WHERE t.merchant_id = m.merchant_id AND t.status = 'declined' AND t.created_at >= '2026-05-01' AND t.created_at < '2026-06-01') / NULLIF((SELECT COUNT(*) FROM fintech.transactions t WHERE t.merchant_id = m.merchant_id AND t.created_at >= '2026-05-01' AND t.created_at < '2026-06-01'), 0), 2) AS decline_rate_pct, (SELECT MAX(t.created_at) FROM fintech.transactions t WHERE t.merchant_id = m.merchant_id AND t.created_at >= '2026-05-01' AND t.created_at < '2026-06-01') AS last_transaction_at FROM fintech.merchants m WHERE EXISTS (SELECT 1 FROM fintech.transactions t WHERE t.merchant_id = m.merchant_id AND t.created_at >= '2026-05-01' AND t.created_at < '2026-06-01') ORDER BY settled_count DESC, m.merchant_id LIMIT 25;",
+  "requirements": [
+    "Return the same 25 rows as the current query for May 2026 (UTC): merchant_id, merchant_name, settled_count, declined_count, decline_rate_pct and last_transaction_at.",
+    "decline_rate_pct is declined authorisations divided by all authorisations of the merchant in May, times 100, rounded to 2 decimals.",
+    "Only merchants with at least one authorisation in May 2026 are eligible; rank them by settled_count descending and merchant_id ascending and keep the top 25.",
+    "Scan fintech.transactions once: no correlated subqueries."
+  ],
+  "acceptanceCriteria": [
+    "Exactly 25 rows in the same order as the current query.",
+    "Columns are merchant_id, merchant_name, settled_count, declined_count, decline_rate_pct and last_transaction_at, in that order.",
+    "EXPLAIN shows a single scan of fintech.transactions instead of one sub plan per output column."
+  ],
+  "expectedColumns": [
+    {
+      "name": "merchant_id",
+      "typeHint": "integer"
+    },
+    {
+      "name": "merchant_name",
+      "typeHint": "text"
+    },
+    {
+      "name": "settled_count",
+      "typeHint": "integer"
+    },
+    {
+      "name": "declined_count",
+      "typeHint": "integer"
+    },
+    {
+      "name": "decline_rate_pct",
+      "typeHint": "decimal"
+    },
+    {
+      "name": "last_transaction_at",
+      "typeHint": "timestamp"
+    }
+  ],
+  "orderMatters": true,
+  "referenceSql": "SELECT m.merchant_id,\n       m.merchant_name,\n       COUNT(*) FILTER (WHERE t.status = 'settled') AS settled_count,\n       COUNT(*) FILTER (WHERE t.status = 'declined') AS declined_count,\n       ROUND(100.0 * COUNT(*) FILTER (WHERE t.status = 'declined') / COUNT(*), 2) AS decline_rate_pct,\n       MAX(t.created_at) AS last_transaction_at\nFROM fintech.transactions AS t\nJOIN fintech.merchants AS m ON m.merchant_id = t.merchant_id\nWHERE t.created_at >= TIMESTAMPTZ '2026-05-01 00:00:00+00'\n  AND t.created_at < TIMESTAMPTZ '2026-06-01 00:00:00+00'\nGROUP BY m.merchant_id, m.merchant_name\nORDER BY settled_count DESC, m.merchant_id\nLIMIT 25;\n",
+  "verificationSql": null,
+  "hints": [
+    "Every subquery filters the same rows (one merchant, May 2026), so a GROUP BY merchant over a single filtered scan can produce all metrics at once.",
+    "Use COUNT(*) FILTER (WHERE status = 'declined') style conditional aggregates for the per status counts.",
+    "An inner join from transactions to merchants already guarantees at least one authorisation per merchant, which replaces the EXISTS clause."
+  ],
+  "explanation": "Each correlated subquery re-reads the transactions of one merchant, so the original plan does five index lookups per merchant. Grouping a single filtered scan by merchant computes every metric in one pass, the inner join replaces the EXISTS filter, and ordering by settled_count with merchant_id as tie breaker keeps the LIMIT deterministic.",
+  "estimatedMinutes": 25
+}

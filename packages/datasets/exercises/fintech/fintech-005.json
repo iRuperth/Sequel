@@ -1,0 +1,63 @@
+{
+  "key": "fintech-005",
+  "order": 5,
+  "title": "Running balance statement for the most overdrawn EUR current account",
+  "track": "data_analyst",
+  "difficulty": "advanced",
+  "topics": ["window_functions", "ctes", "filtering"],
+  "datasetSlugs": ["fintech"],
+  "mode": "read",
+  "stakeholder": {
+    "name": "Hannah Berg",
+    "role": "Customer Support Escalations Manager",
+    "team": "Customer Operations"
+  },
+  "businessContext": "A customer complaint escalated to Hannah: the customer says the app shows a balance they do not recognise. Support needs a statement for the EUR current account with the most negative current balance so they can walk the customer through every movement. Balances are derived from the double entry ledger: in fintech.ledger_postings a credit increases the customer balance and a debit decreases it, and the opening_balance posting carries the balance migrated from the previous core banking system.",
+  "requirements": [
+    "Identify the account: the EUR account with account_type 'current' and the lowest current_balance in fintech.accounts (lowest account_id wins a tie).",
+    "Compute a running balance over all ledger postings of that account ordered by posted_at and then posting_id, where credits add and debits subtract the amount.",
+    "Return only the postings from 2026-01-01 00:00 UTC onwards, but the running balance must include all earlier postings.",
+    "Return account_id, posting_id, posted_at, entry_side, amount and running_balance sorted by posted_at and posting_id."
+  ],
+  "acceptanceCriteria": [
+    "The running_balance on the last row equals current_balance for that account in fintech.accounts.",
+    "The first row of 2026 already reflects every posting made before 2026.",
+    "Rows are ordered by posted_at, then posting_id."
+  ],
+  "expectedColumns": [
+    {
+      "name": "account_id",
+      "typeHint": "integer"
+    },
+    {
+      "name": "posting_id",
+      "typeHint": "integer"
+    },
+    {
+      "name": "posted_at",
+      "typeHint": "timestamp"
+    },
+    {
+      "name": "entry_side",
+      "typeHint": "text"
+    },
+    {
+      "name": "amount",
+      "typeHint": "decimal"
+    },
+    {
+      "name": "running_balance",
+      "typeHint": "decimal"
+    }
+  ],
+  "orderMatters": true,
+  "referenceSql": "WITH target_account AS (\n  SELECT account_id\n  FROM fintech.accounts\n  WHERE account_type = 'current'\n    AND currency = 'EUR'\n  ORDER BY current_balance, account_id\n  LIMIT 1\n),\naccount_postings AS (\n  SELECT p.account_id,\n         p.posting_id,\n         p.posted_at,\n         p.entry_side,\n         p.amount,\n         SUM(CASE WHEN p.entry_side = 'credit' THEN p.amount ELSE -p.amount END)\n           OVER (PARTITION BY p.account_id ORDER BY p.posted_at, p.posting_id) AS running_balance\n  FROM fintech.ledger_postings AS p\n  JOIN target_account AS a ON a.account_id = p.account_id\n)\nSELECT account_id, posting_id, posted_at, entry_side, amount, running_balance\nFROM account_postings\nWHERE posted_at >= TIMESTAMPTZ '2026-01-01 00:00:00+00'\nORDER BY posted_at, posting_id;\n",
+  "verificationSql": null,
+  "hints": [
+    "Find the account first in a CTE with ORDER BY current_balance, account_id LIMIT 1.",
+    "A running total is SUM(signed_amount) OVER (ORDER BY posted_at, posting_id); the sign comes from a CASE on entry_side.",
+    "Filtering a WHERE clause runs before window functions, so apply the 2026 filter in an outer query after computing the running balance."
+  ],
+  "explanation": "The window function sees every posting of the account, so the running balance starts from the migrated opening balance and accumulates the full history. Only after it is computed does the outer query keep the 2026 rows. Ordering the window by posted_at and posting_id makes the running total deterministic when two postings share a timestamp, and the final value reconciles with accounts.current_balance.",
+  "estimatedMinutes": 25
+}

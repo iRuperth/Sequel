@@ -1,0 +1,60 @@
+{
+  "key": "fintech-010",
+  "order": 10,
+  "title": "Accounts whose daily spend spikes above their trailing 30 day average",
+  "track": "data_scientist",
+  "difficulty": "expert",
+  "topics": ["window_functions", "ctes", "analytics_patterns", "date_time"],
+  "datasetSlugs": ["fintech"],
+  "mode": "read",
+  "stakeholder": {
+    "name": "Omar Haddad",
+    "role": "Head of Financial Crime Analytics",
+    "team": "Fraud and Financial Crime"
+  },
+  "businessContext": "The fraud rules engine scores single authorisations but misses accounts whose whole day looks unusual. Omar wants to prototype a behavioural rule on June 2026 data: flag an account day when the settled EUR purchase spend of that day is far above what the account usually spends. The baseline is the average daily spend over the 30 calendar days before the day, where days without spend count as zero.",
+  "requirements": [
+    "Daily spend is the sum of billing_amount of settled purchases (status 'settled', transaction_type 'purchase', billing_currency 'EUR') per account_id and UTC date of created_at.",
+    "For each account and spend date, trailing_30d_avg is the total daily spend of that account over the 30 calendar days strictly before the date, divided by 30.",
+    "Flag spend dates in June 2026 where the account had a positive trailing average, daily_spend is at least 250 and daily_spend is more than 5 times trailing_30d_avg.",
+    "Return account_id, spend_date, daily_spend, trailing_30d_avg rounded to 2 decimals and spend_ratio (daily_spend divided by the unrounded trailing average, rounded to 2 decimals).",
+    "Sort by spend_ratio descending, then account_id and spend_date."
+  ],
+  "acceptanceCriteria": [
+    "Columns are account_id, spend_date, daily_spend, trailing_30d_avg and spend_ratio, in that order.",
+    "Every flagged row has spend_ratio above 5 and daily_spend of at least 250.",
+    "The trailing window never includes the flagged day itself and counts calendar days, not rows."
+  ],
+  "expectedColumns": [
+    {
+      "name": "account_id",
+      "typeHint": "integer"
+    },
+    {
+      "name": "spend_date",
+      "typeHint": "date"
+    },
+    {
+      "name": "daily_spend",
+      "typeHint": "decimal"
+    },
+    {
+      "name": "trailing_30d_avg",
+      "typeHint": "decimal"
+    },
+    {
+      "name": "spend_ratio",
+      "typeHint": "decimal"
+    }
+  ],
+  "orderMatters": true,
+  "referenceSql": "WITH daily AS (\n  SELECT account_id,\n         (created_at AT TIME ZONE 'UTC')::date AS spend_date,\n         SUM(billing_amount) AS daily_spend\n  FROM fintech.transactions\n  WHERE status = 'settled'\n    AND transaction_type = 'purchase'\n    AND billing_currency = 'EUR'\n    AND created_at >= TIMESTAMPTZ '2026-05-02 00:00:00+00'\n    AND created_at < TIMESTAMPTZ '2026-07-01 00:00:00+00'\n  GROUP BY 1, 2\n),\nbaseline AS (\n  SELECT account_id,\n         spend_date,\n         daily_spend,\n         COALESCE(\n           SUM(daily_spend) OVER (\n             PARTITION BY account_id\n             ORDER BY spend_date\n             RANGE BETWEEN INTERVAL '30 days' PRECEDING AND INTERVAL '1 day' PRECEDING\n           ),\n           0\n         ) / 30.0 AS trailing_avg\n  FROM daily\n)\nSELECT account_id,\n       spend_date,\n       daily_spend,\n       ROUND(trailing_avg, 2) AS trailing_30d_avg,\n       ROUND(daily_spend / trailing_avg, 2) AS spend_ratio\nFROM baseline\nWHERE spend_date >= DATE '2026-06-01'\n  AND trailing_avg > 0\n  AND daily_spend >= 250\n  AND daily_spend > 5 * trailing_avg\nORDER BY spend_ratio DESC, account_id, spend_date;\n",
+  "verificationSql": null,
+  "hints": [
+    "Aggregate to one row per account and day first; the trailing window must run over days, not over individual transactions.",
+    "A RANGE frame on a date column accepts intervals: RANGE BETWEEN INTERVAL '30 days' PRECEDING AND INTERVAL '1 day' PRECEDING.",
+    "Divide the windowed sum by 30 (calendar days), not by the number of rows in the frame, and remember the window needs May data even though only June is reported."
+  ],
+  "explanation": "Aggregating to account days before windowing makes the frame operate on calendar days. A RANGE frame with interval offsets includes exactly the previous 30 days regardless of how many active days there were, and dividing by 30 treats inactive days as zero spend. Reading data from 2 May gives every June day a full baseline while the final filter keeps only June.",
+  "estimatedMinutes": 40
+}

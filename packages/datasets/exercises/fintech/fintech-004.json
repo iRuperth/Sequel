@@ -1,0 +1,54 @@
+{
+  "key": "fintech-004",
+  "order": 4,
+  "title": "Daily share of transactions without a mapped merchant",
+  "track": "data_engineer",
+  "difficulty": "intermediate",
+  "topics": ["data_quality", "null_handling", "aggregation", "date_time"],
+  "datasetSlugs": ["fintech"],
+  "mode": "read",
+  "stakeholder": {
+    "name": "Daniel Okafor",
+    "role": "Data Engineering Lead",
+    "team": "Payments Data Platform"
+  },
+  "businessContext": "The merchant enrichment service matches raw card descriptors to our merchant directory. When it fails, fintech.transactions.merchant_id stays null and downstream merchant analytics silently lose volume. The not null quality check on that column is red, and before we open an incident with the enrichment vendor Daniel wants a daily trend for June 2026 to see whether the failure rate is stable or getting worse.",
+  "requirements": [
+    "Consider every authorisation in fintech.transactions created in June 2026 (UTC), whatever its status.",
+    "Return one row per UTC calendar day with the total number of authorisations, the number with a null merchant_id and the unmapped share as a percentage rounded to 2 decimals.",
+    "Sort the result by day, oldest first."
+  ],
+  "acceptanceCriteria": [
+    "Exactly 30 rows, one per day of June 2026.",
+    "Columns are transaction_date, total_transactions, unmapped_transactions and unmapped_pct, in that order.",
+    "unmapped_pct is 100 times unmapped_transactions divided by total_transactions, rounded to 2 decimals."
+  ],
+  "expectedColumns": [
+    {
+      "name": "transaction_date",
+      "typeHint": "date"
+    },
+    {
+      "name": "total_transactions",
+      "typeHint": "integer"
+    },
+    {
+      "name": "unmapped_transactions",
+      "typeHint": "integer"
+    },
+    {
+      "name": "unmapped_pct",
+      "typeHint": "decimal"
+    }
+  ],
+  "orderMatters": true,
+  "referenceSql": "SELECT (created_at AT TIME ZONE 'UTC')::date AS transaction_date,\n       COUNT(*) AS total_transactions,\n       COUNT(*) FILTER (WHERE merchant_id IS NULL) AS unmapped_transactions,\n       ROUND(100.0 * COUNT(*) FILTER (WHERE merchant_id IS NULL) / COUNT(*), 2) AS unmapped_pct\nFROM fintech.transactions\nWHERE created_at >= TIMESTAMPTZ '2026-06-01 00:00:00+00'\n  AND created_at < TIMESTAMPTZ '2026-07-01 00:00:00+00'\nGROUP BY 1\nORDER BY transaction_date;\n",
+  "verificationSql": null,
+  "hints": [
+    "Convert created_at to a UTC date with (created_at AT TIME ZONE 'UTC')::date and group by it.",
+    "COUNT(*) FILTER (WHERE merchant_id IS NULL) counts only the unmapped rows inside the same GROUP BY.",
+    "Multiply by 100.0 (not 100) before dividing so the division is not an integer division, then ROUND(..., 2)."
+  ],
+  "explanation": "Conditional aggregation computes the total and the unmapped count in one pass over the table. Using 100.0 forces numeric division, and grouping by the UTC date keeps the daily buckets aligned with the operational reporting day of the payments team.",
+  "estimatedMinutes": 15
+}

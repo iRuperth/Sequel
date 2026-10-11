@@ -1,0 +1,55 @@
+{
+  "key": "fintech-003",
+  "order": 3,
+  "title": "Monthly EUR card volume by merchant category group, H1 2026",
+  "track": "data_analyst",
+  "difficulty": "intermediate",
+  "topics": ["date_time", "aggregation", "joins"],
+  "datasetSlugs": ["fintech"],
+  "mode": "read",
+  "stakeholder": {
+    "name": "Sophie Laurent",
+    "role": "Finance Business Partner",
+    "team": "Financial Planning and Analysis"
+  },
+  "businessContext": "Interchange revenue is earned on settled card purchases, and FP&A is rebuilding the interchange forecast by merchant category. Sophie needs the monthly settled purchase volume for euro denominated cards in the first half of 2026, split by merchant category group. The forecast model works on the raw network MCC, so purchases whose merchant could not be mapped by enrichment must still be included.",
+  "requirements": [
+    "Use settled purchases (status = 'settled', transaction_type = 'purchase') whose billing_currency is EUR.",
+    "Include authorisations created from 2026-01-01 00:00 UTC up to but excluding 2026-07-01 00:00 UTC and bucket them by the UTC calendar month of created_at.",
+    "Classify each purchase with the network MCC stored on fintech.transactions.mcc joined to fintech.merchant_categories, not with the merchant record.",
+    "Return the month (first day of the month as a date), the category group, the number of settled purchases and the summed billing_amount."
+  ],
+  "acceptanceCriteria": [
+    "Columns are month, category_group, settled_purchases and settled_volume_eur, in that order.",
+    "month is a date such as 2026-03-01, not a timestamp.",
+    "Purchases with a null merchant_id are counted in their category group."
+  ],
+  "expectedColumns": [
+    {
+      "name": "month",
+      "typeHint": "date"
+    },
+    {
+      "name": "category_group",
+      "typeHint": "text"
+    },
+    {
+      "name": "settled_purchases",
+      "typeHint": "integer"
+    },
+    {
+      "name": "settled_volume_eur",
+      "typeHint": "decimal"
+    }
+  ],
+  "orderMatters": false,
+  "referenceSql": "SELECT DATE_TRUNC('month', t.created_at AT TIME ZONE 'UTC')::date AS month,\n       mc.category_group,\n       COUNT(*) AS settled_purchases,\n       SUM(t.billing_amount) AS settled_volume_eur\nFROM fintech.transactions AS t\nJOIN fintech.merchant_categories AS mc ON mc.mcc = t.mcc\nWHERE t.status = 'settled'\n  AND t.transaction_type = 'purchase'\n  AND t.billing_currency = 'EUR'\n  AND t.created_at >= TIMESTAMPTZ '2026-01-01 00:00:00+00'\n  AND t.created_at < TIMESTAMPTZ '2026-07-01 00:00:00+00'\nGROUP BY 1, 2\nORDER BY month, settled_volume_eur DESC, mc.category_group;\n",
+  "verificationSql": null,
+  "hints": [
+    "fintech.transactions carries its own mcc column, so you can reach merchant_categories without going through merchants.",
+    "DATE_TRUNC('month', created_at AT TIME ZONE 'UTC') returns the first instant of the month; cast it to date.",
+    "Sum billing_amount rather than amount: billing_amount is already expressed in the card currency, which is EUR for these rows."
+  ],
+  "explanation": "The network MCC on the authorisation is populated even when enrichment fails, so joining on t.mcc keeps unmapped purchases in the forecast. Converting created_at to UTC before truncating guarantees the month buckets do not move with the session time zone, and billing_amount is the amount actually charged to the euro card, which is what interchange is calculated on.",
+  "estimatedMinutes": 18
+}
