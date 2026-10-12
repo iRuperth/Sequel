@@ -1,0 +1,438 @@
+{
+  "employeeNumberPrefix": "E",
+  "emailDomain": "corp.example",
+  "locations": [
+    {
+      "officeName": "Berlin Headquarters",
+      "city": "Berlin",
+      "countryCode": "DE",
+      "region": "EMEA",
+      "isRemoteHub": false,
+      "openedMonthsAgo": 108,
+      "currency": "EUR",
+      "salaryFactor": 1.0,
+      "weight": 38
+    },
+    {
+      "officeName": "London Office",
+      "city": "London",
+      "countryCode": "GB",
+      "region": "EMEA",
+      "isRemoteHub": false,
+      "openedMonthsAgo": 84,
+      "currency": "GBP",
+      "salaryFactor": 0.92,
+      "weight": 16
+    },
+    {
+      "officeName": "Amsterdam Office",
+      "city": "Amsterdam",
+      "countryCode": "NL",
+      "region": "EMEA",
+      "isRemoteHub": false,
+      "openedMonthsAgo": 72,
+      "currency": "EUR",
+      "salaryFactor": 1.02,
+      "weight": 12
+    },
+    {
+      "officeName": "Lisbon Hub",
+      "city": "Lisbon",
+      "countryCode": "PT",
+      "region": "EMEA",
+      "isRemoteHub": true,
+      "openedMonthsAgo": 48,
+      "currency": "EUR",
+      "salaryFactor": 0.72,
+      "weight": 11
+    },
+    {
+      "officeName": "Barcelona Office",
+      "city": "Barcelona",
+      "countryCode": "ES",
+      "region": "EMEA",
+      "isRemoteHub": false,
+      "openedMonthsAgo": 60,
+      "currency": "EUR",
+      "salaryFactor": 0.8,
+      "weight": 9
+    },
+    {
+      "officeName": "Warsaw Engineering Hub",
+      "city": "Warsaw",
+      "countryCode": "PL",
+      "region": "EMEA",
+      "isRemoteHub": true,
+      "openedMonthsAgo": 40,
+      "currency": "PLN",
+      "salaryFactor": 2.7,
+      "weight": 7
+    },
+    {
+      "officeName": "New York Office",
+      "city": "New York",
+      "countryCode": "US",
+      "region": "AMER",
+      "isRemoteHub": false,
+      "openedMonthsAgo": 36,
+      "currency": "USD",
+      "salaryFactor": 1.45,
+      "weight": 5
+    },
+    {
+      "officeName": "Dublin Office",
+      "city": "Dublin",
+      "countryCode": "IE",
+      "region": "EMEA",
+      "isRemoteHub": false,
+      "openedMonthsAgo": 30,
+      "currency": "EUR",
+      "salaryFactor": 1.0,
+      "weight": 4
+    }
+  ],
+  "departments": [
+    {
+      "name": "Executive Office",
+      "parent": null,
+      "costCenterCode": "CC-1000",
+      "family": "executive",
+      "weight": 0.4
+    },
+    {
+      "name": "Technology",
+      "parent": "Executive Office",
+      "costCenterCode": "CC-2000",
+      "family": "engineering",
+      "weight": 0.3
+    },
+    {
+      "name": "Platform Engineering",
+      "parent": "Technology",
+      "costCenterCode": "CC-2100",
+      "family": "engineering",
+      "weight": 14
+    },
+    {
+      "name": "Product Engineering",
+      "parent": "Technology",
+      "costCenterCode": "CC-2200",
+      "family": "engineering",
+      "weight": 16
+    },
+    {
+      "name": "Data and Analytics",
+      "parent": "Technology",
+      "costCenterCode": "CC-2300",
+      "family": "data",
+      "weight": 8
+    },
+    {
+      "name": "Security",
+      "parent": "Technology",
+      "costCenterCode": "CC-2400",
+      "family": "engineering",
+      "weight": 3
+    },
+    {
+      "name": "Product Management",
+      "parent": "Technology",
+      "costCenterCode": "CC-2500",
+      "family": "product",
+      "weight": 5
+    },
+    {
+      "name": "Design",
+      "parent": "Technology",
+      "costCenterCode": "CC-2600",
+      "family": "design",
+      "weight": 4
+    },
+    {
+      "name": "Commercial",
+      "parent": "Executive Office",
+      "costCenterCode": "CC-3000",
+      "family": "sales",
+      "weight": 0.3
+    },
+    {
+      "name": "Sales",
+      "parent": "Commercial",
+      "costCenterCode": "CC-3100",
+      "family": "sales",
+      "weight": 9
+    },
+    {
+      "name": "Marketing",
+      "parent": "Commercial",
+      "costCenterCode": "CC-3200",
+      "family": "marketing",
+      "weight": 6
+    },
+    {
+      "name": "Customer Support",
+      "parent": "Commercial",
+      "costCenterCode": "CC-3300",
+      "family": "customer_support",
+      "weight": 12
+    },
+    {
+      "name": "Operations",
+      "parent": "Executive Office",
+      "costCenterCode": "CC-4000",
+      "family": "operations",
+      "weight": 0.3
+    },
+    {
+      "name": "Payments Operations",
+      "parent": "Operations",
+      "costCenterCode": "CC-4100",
+      "family": "operations",
+      "weight": 6
+    },
+    {
+      "name": "Risk and Compliance",
+      "parent": "Operations",
+      "costCenterCode": "CC-4200",
+      "family": "risk",
+      "weight": 6
+    },
+    {
+      "name": "Corporate Functions",
+      "parent": "Executive Office",
+      "costCenterCode": "CC-5000",
+      "family": "finance",
+      "weight": 0.3
+    },
+    {
+      "name": "Finance",
+      "parent": "Corporate Functions",
+      "costCenterCode": "CC-5100",
+      "family": "finance",
+      "weight": 4
+    },
+    {
+      "name": "People",
+      "parent": "Corporate Functions",
+      "costCenterCode": "CC-5200",
+      "family": "people",
+      "weight": 3
+    },
+    {
+      "name": "Legal",
+      "parent": "Corporate Functions",
+      "costCenterCode": "CC-5300",
+      "family": "legal",
+      "weight": 2
+    },
+    {
+      "name": "Workplace",
+      "parent": "Corporate Functions",
+      "costCenterCode": "CC-5400",
+      "family": "operations",
+      "weight": 1.5
+    }
+  ],
+  "jobFamilies": {
+    "executive": {
+      "L1": "Executive Assistant",
+      "L2": "Senior Executive Assistant",
+      "L3": "Strategy Associate",
+      "L4": "Strategy Manager",
+      "L5": "Chief of Staff",
+      "L6": "Senior Director Strategy",
+      "L7": "Managing Director",
+      "L8": "Chief Executive Officer"
+    },
+    "engineering": {
+      "L1": "Associate Software Engineer",
+      "L2": "Software Engineer",
+      "L3": "Software Engineer II",
+      "L4": "Senior Software Engineer",
+      "L5": "Staff Software Engineer",
+      "L6": "Engineering Manager",
+      "L7": "Director of Engineering",
+      "L8": "VP Engineering"
+    },
+    "data": {
+      "L1": "Data Analyst",
+      "L2": "Data Analyst II",
+      "L3": "Data Engineer",
+      "L4": "Senior Data Engineer",
+      "L5": "Staff Data Scientist",
+      "L6": "Data Science Manager",
+      "L7": "Director of Data",
+      "L8": "Chief Data Officer"
+    },
+    "product": {
+      "L1": "Associate Product Manager",
+      "L2": "Product Manager",
+      "L3": "Product Manager II",
+      "L4": "Senior Product Manager",
+      "L5": "Principal Product Manager",
+      "L6": "Group Product Manager",
+      "L7": "Director of Product",
+      "L8": "VP Product"
+    },
+    "design": {
+      "L1": "Junior Product Designer",
+      "L2": "Product Designer",
+      "L3": "Product Designer II",
+      "L4": "Senior Product Designer",
+      "L5": "Lead Product Designer",
+      "L6": "Design Manager",
+      "L7": "Head of Design",
+      "L8": "VP Design"
+    },
+    "sales": {
+      "L1": "Sales Development Representative",
+      "L2": "Account Executive",
+      "L3": "Account Executive II",
+      "L4": "Senior Account Executive",
+      "L5": "Enterprise Account Director",
+      "L6": "Sales Manager",
+      "L7": "Head of Sales",
+      "L8": "Chief Revenue Officer"
+    },
+    "marketing": {
+      "L1": "Marketing Coordinator",
+      "L2": "Marketing Specialist",
+      "L3": "Growth Marketer",
+      "L4": "Senior Growth Marketer",
+      "L5": "Lead Marketing Strategist",
+      "L6": "Marketing Manager",
+      "L7": "Head of Marketing",
+      "L8": "Chief Marketing Officer"
+    },
+    "customer_support": {
+      "L1": "Customer Support Agent",
+      "L2": "Customer Support Specialist",
+      "L3": "Senior Support Specialist",
+      "L4": "Support Team Lead",
+      "L5": "Support Operations Lead",
+      "L6": "Customer Support Manager",
+      "L7": "Head of Customer Experience",
+      "L8": "VP Customer Operations"
+    },
+    "operations": {
+      "L1": "Operations Associate",
+      "L2": "Operations Analyst",
+      "L3": "Operations Analyst II",
+      "L4": "Senior Operations Analyst",
+      "L5": "Operations Lead",
+      "L6": "Operations Manager",
+      "L7": "Head of Operations",
+      "L8": "Chief Operating Officer"
+    },
+    "risk": {
+      "L1": "Risk Analyst",
+      "L2": "Compliance Analyst",
+      "L3": "Fraud Investigator",
+      "L4": "Senior Risk Analyst",
+      "L5": "Risk Lead",
+      "L6": "Compliance Manager",
+      "L7": "Head of Risk",
+      "L8": "Chief Risk Officer"
+    },
+    "finance": {
+      "L1": "Finance Associate",
+      "L2": "Accountant",
+      "L3": "Financial Analyst",
+      "L4": "Senior Financial Analyst",
+      "L5": "Finance Lead",
+      "L6": "Financial Controller",
+      "L7": "Head of Finance",
+      "L8": "Chief Financial Officer"
+    },
+    "people": {
+      "L1": "People Coordinator",
+      "L2": "People Partner",
+      "L3": "Talent Acquisition Partner",
+      "L4": "Senior People Partner",
+      "L5": "People Lead",
+      "L6": "People Manager",
+      "L7": "Head of People",
+      "L8": "Chief People Officer"
+    },
+    "legal": {
+      "L1": "Legal Assistant",
+      "L2": "Paralegal",
+      "L3": "Legal Counsel",
+      "L4": "Senior Legal Counsel",
+      "L5": "Lead Counsel",
+      "L6": "Legal Manager",
+      "L7": "Head of Legal",
+      "L8": "General Counsel"
+    }
+  },
+  "levels": [
+    { "level": "L1", "rank": 1, "weight": 10, "salaryRange": [36000, 46000], "bonusTargetPct": 0 },
+    { "level": "L2", "rank": 2, "weight": 24, "salaryRange": [45000, 58000], "bonusTargetPct": 5 },
+    { "level": "L3", "rank": 3, "weight": 26, "salaryRange": [56000, 72000], "bonusTargetPct": 8 },
+    { "level": "L4", "rank": 4, "weight": 18, "salaryRange": [70000, 90000], "bonusTargetPct": 10 },
+    {
+      "level": "L5",
+      "rank": 5,
+      "weight": 11,
+      "salaryRange": [86000, 110000],
+      "bonusTargetPct": 12
+    },
+    {
+      "level": "L6",
+      "rank": 6,
+      "weight": 6,
+      "salaryRange": [105000, 135000],
+      "bonusTargetPct": 15
+    },
+    {
+      "level": "L7",
+      "rank": 7,
+      "weight": 3.5,
+      "salaryRange": [130000, 170000],
+      "bonusTargetPct": 20
+    },
+    {
+      "level": "L8",
+      "rank": 8,
+      "weight": 1.5,
+      "salaryRange": [160000, 230000],
+      "bonusTargetPct": 30
+    }
+  ],
+  "leaveTypes": [
+    { "value": "annual", "weight": 55, "dayRange": [1, 10], "noticeDays": [7, 60] },
+    { "value": "sick", "weight": 28, "dayRange": [1, 4], "noticeDays": [0, 0] },
+    { "value": "parental", "weight": 2, "dayRange": [20, 60], "noticeDays": [30, 90] },
+    { "value": "unpaid", "weight": 3, "dayRange": [1, 10], "noticeDays": [14, 45] },
+    { "value": "bereavement", "weight": 2, "dayRange": [1, 5], "noticeDays": [0, 2] },
+    { "value": "study", "weight": 3, "dayRange": [1, 5], "noticeDays": [10, 40] }
+  ],
+  "terminationReasons": [
+    { "value": "resignation", "weight": 68 },
+    { "value": "dismissal", "weight": 8 },
+    { "value": "redundancy", "weight": 10 },
+    { "value": "retirement", "weight": 2 },
+    { "value": "contract_end", "weight": 12 }
+  ],
+  "employmentTypes": [
+    { "value": "full_time", "weight": 86 },
+    { "value": "part_time", "weight": 7 },
+    { "value": "contractor", "weight": 7 }
+  ],
+  "ratingWeights": [3, 12, 50, 28, 7],
+  "rates": {
+    "meanTenureMonths": 62,
+    "monthsPerPromotion": 26,
+    "transferShare": 0.06,
+    "overlappingHistoryShare": 0.004,
+    "onLeaveShare": 0.02,
+    "annualRaiseRange": [0.015, 0.05],
+    "promotionRaiseRange": [0.08, 0.15],
+    "leaveRequestsPerMonth": 0.32,
+    "leaveRejectionShare": 0.05,
+    "leaveCancellationShare": 0.04,
+    "selfRatingShare": 0.85,
+    "uncalibratedShareLatestPeriod": 0.2,
+    "annualReviewMonth": 4
+  }
+}

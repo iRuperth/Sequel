@@ -1,0 +1,260 @@
+dataset: finance
+tables:
+  - name: cost_centers
+    description: Cost centers used to allocate spend. Codes match the department cost centers in the HR system.
+    grain: One row per cost center
+    ownerTeam: Finance Systems
+    tags: [reference, controlling]
+    columns:
+      - name: cost_center_id
+        description: Surrogate key of the cost center.
+        pii: false
+      - name: cost_center_code
+        description: Cost center code used in the ERP.
+        pii: false
+        exampleValues: [CC-2100, CC-4100]
+      - name: cost_center_name
+        description: Cost center name.
+        pii: false
+      - name: division
+        description: Division the cost center rolls up to.
+        pii: false
+        exampleValues: [Technology, Commercial, Operations, Corporate]
+      - name: owner_name
+        description: Budget owner.
+        pii: true
+      - name: is_active
+        description: False for retired cost centers that no longer receive postings.
+        pii: false
+
+  - name: accounts
+    description: Chart of accounts of the general ledger.
+    grain: One row per general ledger account
+    ownerTeam: Finance Systems
+    tags: [reference, ledger]
+    columns:
+      - name: account_id
+        description: Surrogate key of the account.
+        pii: false
+      - name: account_code
+        description: Four digit account code.
+        pii: false
+        exampleValues: ["1000", "2000", "6100"]
+      - name: account_name
+        description: Account name.
+        pii: false
+        exampleValues: [Cash at bank, Cloud infrastructure]
+      - name: account_type
+        description: Financial statement classification.
+        pii: false
+        exampleValues: [asset, liability, equity, revenue, expense]
+      - name: account_subtype
+        description: Detailed classification used in management reporting.
+        pii: false
+        exampleValues: [cash, payables, technology, personnel]
+      - name: normal_balance
+        description: Side that increases the account.
+        pii: false
+        exampleValues: [debit, credit]
+      - name: is_active
+        description: False for accounts closed for posting.
+        pii: false
+
+  - name: exchange_rates
+    description: >-
+      Daily rates to convert foreign currency amounts into the functional currency (EUR). Multiply an amount in
+      from_currency by rate to get euro. There is no row for EUR itself.
+    grain: One row per day and source currency
+    ownerTeam: Treasury
+    tags: [reference, fx]
+    columns:
+      - name: rate_date
+        description: Date the rate applies to.
+        pii: false
+      - name: from_currency
+        description: Source currency.
+        pii: false
+        exampleValues: [USD, GBP, CHF]
+      - name: to_currency
+        description: Target currency, always EUR.
+        pii: false
+      - name: rate
+        description: Euro per one unit of from_currency.
+        pii: false
+
+  - name: invoices
+    description: >-
+      Supplier invoices (payable) and customer invoices (receivable) from the ERP. Amounts are in the invoice
+      currency. Known issue: for about one percent of invoices the header subtotal was not updated after the lines
+      changed, so it does not match the sum of invoice_lines.
+    grain: One row per invoice
+    ownerTeam: Finance Operations
+    tags: [invoices, payables, receivables]
+    columns:
+      - name: invoice_id
+        description: Surrogate key of the invoice.
+        pii: false
+      - name: invoice_number
+        description: Invoice number, prefixed AP for payables and AR for receivables.
+        pii: false
+        exampleValues: [AP-2025-00412, AR-2026-00077]
+      - name: invoice_type
+        description: Payable (we owe the supplier) or receivable (the customer owes us).
+        pii: false
+        exampleValues: [payable, receivable]
+      - name: counterparty_name
+        description: Supplier or customer company name.
+        pii: false
+      - name: counterparty_country
+        description: Country of the counterparty. Cross border invoices carry no VAT (reverse charge).
+        pii: false
+      - name: cost_center_id
+        description: Cost center the invoice is booked to.
+        pii: false
+      - name: currency
+        description: Invoice currency.
+        pii: false
+      - name: invoice_date
+        description: Invoice date, which is also the accounting date.
+        pii: false
+      - name: due_date
+        description: Payment due date. Can be after the snapshot date.
+        pii: false
+      - name: subtotal_amount
+        description: Header subtotal before VAT.
+        pii: false
+      - name: tax_amount
+        description: VAT on the invoice.
+        pii: false
+      - name: total_amount
+        description: Header total including VAT.
+        pii: false
+      - name: status
+        description: Workflow status. approved invoices are booked but not yet paid.
+        pii: false
+        exampleValues: [draft, approved, paid, partially_paid, void]
+      - name: paid_at
+        description: Timestamp (UTC) of the payment. Null when unpaid.
+        pii: false
+
+  - name: invoice_lines
+    description: Lines of each invoice with the general ledger account they are booked to. The ledger is posted from these lines.
+    grain: One row per invoice line
+    ownerTeam: Finance Operations
+    tags: [invoices]
+    columns:
+      - name: invoice_line_id
+        description: Surrogate key of the line.
+        pii: false
+      - name: invoice_id
+        description: Invoice the line belongs to.
+        pii: false
+      - name: line_number
+        description: Position of the line on the invoice.
+        pii: false
+      - name: account_id
+        description: General ledger account charged or credited.
+        pii: false
+      - name: description
+        description: Line description from the supplier or our billing system.
+        pii: false
+        exampleValues: [Compute instances, Placement fee]
+      - name: quantity
+        description: Quantity invoiced.
+        pii: false
+      - name: unit_price
+        description: Unit price in the invoice currency.
+        pii: false
+      - name: line_amount
+        description: quantity times unit_price, before VAT.
+        pii: false
+      - name: tax_rate
+        description: VAT rate applied as a fraction.
+        pii: false
+
+  - name: ledger_entries
+    description: >-
+      General ledger journal lines in the functional currency (EUR). Every journal balances (total debits equal
+      total credits). Journals are posted from invoices, invoice payments, monthly payroll and month end accruals
+      that reverse on the first day of the next month.
+    grain: One row per journal line
+    ownerTeam: Finance Systems
+    tags: [ledger, accounting]
+    columns:
+      - name: entry_id
+        description: Surrogate key of the journal line.
+        pii: false
+      - name: journal_id
+        description: Journal grouping balanced lines.
+        pii: false
+      - name: entry_date
+        description: Accounting date.
+        pii: false
+      - name: account_id
+        description: General ledger account.
+        pii: false
+      - name: cost_center_id
+        description: Cost center for profit and loss lines. Null for balance sheet lines.
+        pii: false
+      - name: description
+        description: Line description.
+        pii: false
+      - name: debit_amount
+        description: Debit amount in EUR, zero on credit lines.
+        pii: false
+      - name: credit_amount
+        description: Credit amount in EUR, zero on debit lines.
+        pii: false
+      - name: currency
+        description: Functional currency, always EUR.
+        pii: false
+      - name: source_type
+        description: Process that created the journal.
+        pii: false
+        exampleValues: [invoice, payment, payroll, accrual]
+      - name: source_reference
+        description: Reference of the source document, for example the invoice number.
+        pii: false
+        exampleValues: [AP-2025-00412, PAYROLL-2026-05]
+      - name: posted_at
+        description: Timestamp (UTC) when the journal was posted.
+        pii: false
+
+  - name: budgets
+    description: Approved monthly budget per cost center and expense account for the fiscal years in the data window, in EUR.
+    grain: One row per fiscal month, cost center and account
+    ownerTeam: Financial Planning and Analysis
+    tags: [budgeting, controlling]
+    columns:
+      - name: budget_id
+        description: Surrogate key of the budget line.
+        pii: false
+      - name: fiscal_year
+        description: Fiscal year (calendar year).
+        pii: false
+      - name: fiscal_month
+        description: Fiscal month from 1 to 12.
+        pii: false
+      - name: cost_center_id
+        description: Cost center the budget belongs to.
+        pii: false
+      - name: account_id
+        description: Expense account budgeted.
+        pii: false
+      - name: budget_amount
+        description: Budgeted amount for the month.
+        pii: false
+      - name: currency
+        description: Budget currency, always EUR.
+        pii: false
+links:
+  - fromTable: ledger_entries
+    fromColumn: source_reference
+    toTable: invoices
+    toColumn: invoice_number
+    description: Invoice and payment journals reference the invoice number.
+  - fromTable: invoices
+    fromColumn: currency
+    toTable: exchange_rates
+    toColumn: from_currency
+    description: Foreign currency invoices convert to EUR with the rate of the invoice date.

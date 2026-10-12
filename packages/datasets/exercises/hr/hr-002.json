@@ -1,0 +1,62 @@
+{
+  "key": "hr-002",
+  "order": 2,
+  "title": "Overlapping job history records",
+  "track": "data_engineer",
+  "difficulty": "advanced",
+  "topics": ["data_quality", "joins", "date_time", "null_handling"],
+  "datasetSlugs": ["hr"],
+  "mode": "read",
+  "stakeholder": {
+    "name": "Lars Lindberg",
+    "role": "HRIS Data Steward",
+    "team": "People Systems"
+  },
+  "businessContext": "Payroll found people who appear in two roles at the same time, which breaks the cost allocation by department. In hr.employment_history each row is a period in one role, and a null end_date means the period is still open. Lars needs every pair of rows of the same employee whose periods overlap so People Systems can correct them at the source.",
+  "requirements": [
+    "Compare every pair of employment_history rows of the same employee, pairing each row with every row that has a higher history_id.",
+    "Two periods overlap when each one starts on or before the other one ends; treat a null end_date as open ended. Both start and end dates are inclusive.",
+    "Return the employee, both history ids, the first and last day of the overlap and the overlap length in days (inclusive)."
+  ],
+  "acceptanceCriteria": [
+    "Columns are employee_id, earlier_history_id, later_history_id, overlap_start, overlap_end and overlap_days, in that order.",
+    "earlier_history_id is always lower than later_history_id.",
+    "overlap_days equals overlap_end minus overlap_start plus one."
+  ],
+  "expectedColumns": [
+    {
+      "name": "employee_id",
+      "typeHint": "integer"
+    },
+    {
+      "name": "earlier_history_id",
+      "typeHint": "integer"
+    },
+    {
+      "name": "later_history_id",
+      "typeHint": "integer"
+    },
+    {
+      "name": "overlap_start",
+      "typeHint": "date"
+    },
+    {
+      "name": "overlap_end",
+      "typeHint": "date"
+    },
+    {
+      "name": "overlap_days",
+      "typeHint": "integer"
+    }
+  ],
+  "orderMatters": false,
+  "referenceSql": "SELECT a.employee_id,\n       a.history_id AS earlier_history_id,\n       b.history_id AS later_history_id,\n       GREATEST(a.start_date, b.start_date) AS overlap_start,\n       LEAST(a.end_date, b.end_date) AS overlap_end,\n       LEAST(a.end_date, b.end_date) - GREATEST(a.start_date, b.start_date) + 1 AS overlap_days\nFROM hr.employment_history AS a\nJOIN hr.employment_history AS b\n  ON b.employee_id = a.employee_id\n AND b.history_id > a.history_id\nWHERE a.start_date <= COALESCE(b.end_date, DATE 'infinity')\n  AND b.start_date <= COALESCE(a.end_date, DATE 'infinity')\nORDER BY a.employee_id, a.history_id, b.history_id;\n",
+  "verificationSql": null,
+  "hints": [
+    "Self join employment_history on employee_id with b.history_id > a.history_id so each pair appears once.",
+    "Intervals [s1, e1] and [s2, e2] overlap when s1 <= e2 and s2 <= e1; replace a null end with DATE 'infinity'.",
+    "GREATEST of the starts and LEAST of the ends give the overlap; LEAST ignores nulls, which handles the open period."
+  ],
+  "explanation": "A self join on the employee with an ordering condition on history_id compares each pair exactly once. The classic interval overlap test needs both comparisons, and COALESCE with infinity makes open periods behave like an unbounded end. Date subtraction returns days, so adding one gives an inclusive length.",
+  "estimatedMinutes": 25
+}

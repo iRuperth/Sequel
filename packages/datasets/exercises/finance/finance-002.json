@@ -1,0 +1,63 @@
+{
+  "key": "finance-002",
+  "order": 2,
+  "title": "Budget versus actual by cost center for H1 2026",
+  "track": "data_analyst",
+  "difficulty": "advanced",
+  "topics": ["ctes", "joins", "aggregation", "null_handling"],
+  "datasetSlugs": ["finance"],
+  "mode": "read",
+  "stakeholder": {
+    "name": "Victor Moreau",
+    "role": "Financial Controller",
+    "team": "Group Finance"
+  },
+  "businessContext": "The half year review with the CFO compares spend against the approved budget. Victor needs, per cost center, the budget for January to June 2026, the actual spend booked in the general ledger on the same accounts and the variance. Actuals are only comparable on budgeted lines, so spend on accounts a cost center has no budget for is left out of this view.",
+  "requirements": [
+    "Budget is the sum of finance.budgets.budget_amount for fiscal_year 2026 and fiscal_month 1 to 6, per cost center and account.",
+    "Actual is the sum of debit_amount minus credit_amount in finance.ledger_entries with entry_date from 2026-01-01 to 2026-06-30, per cost center and account.",
+    "Match actuals to budget lines on cost center and account; budget lines without actuals count as zero actual.",
+    "Return per cost center the code, name, budget_eur, actual_eur, variance_eur (actual minus budget) and variance_pct (variance over budget times 100, rounded to 1 decimal), sorted by variance_eur descending and then cost center code."
+  ],
+  "acceptanceCriteria": [
+    "One row per cost center that has a budget in H1 2026.",
+    "Columns are cost_center_code, cost_center_name, budget_eur, actual_eur, variance_eur and variance_pct, in that order.",
+    "A positive variance means overspend."
+  ],
+  "expectedColumns": [
+    {
+      "name": "cost_center_code",
+      "typeHint": "text"
+    },
+    {
+      "name": "cost_center_name",
+      "typeHint": "text"
+    },
+    {
+      "name": "budget_eur",
+      "typeHint": "decimal"
+    },
+    {
+      "name": "actual_eur",
+      "typeHint": "decimal"
+    },
+    {
+      "name": "variance_eur",
+      "typeHint": "decimal"
+    },
+    {
+      "name": "variance_pct",
+      "typeHint": "decimal"
+    }
+  ],
+  "orderMatters": true,
+  "referenceSql": "WITH budget AS (\n  SELECT cost_center_id, account_id, SUM(budget_amount) AS budget_eur\n  FROM finance.budgets\n  WHERE fiscal_year = 2026\n    AND fiscal_month BETWEEN 1 AND 6\n  GROUP BY cost_center_id, account_id\n),\nactual AS (\n  SELECT cost_center_id, account_id, SUM(debit_amount - credit_amount) AS actual_eur\n  FROM finance.ledger_entries\n  WHERE entry_date >= DATE '2026-01-01'\n    AND entry_date < DATE '2026-07-01'\n    AND cost_center_id IS NOT NULL\n  GROUP BY cost_center_id, account_id\n)\nSELECT cc.cost_center_code,\n       cc.cost_center_name,\n       SUM(b.budget_eur) AS budget_eur,\n       SUM(COALESCE(a.actual_eur, 0)) AS actual_eur,\n       SUM(COALESCE(a.actual_eur, 0)) - SUM(b.budget_eur) AS variance_eur,\n       ROUND(100.0 * (SUM(COALESCE(a.actual_eur, 0)) - SUM(b.budget_eur)) / SUM(b.budget_eur), 1) AS variance_pct\nFROM budget AS b\nJOIN finance.cost_centers AS cc ON cc.cost_center_id = b.cost_center_id\nLEFT JOIN actual AS a ON a.cost_center_id = b.cost_center_id AND a.account_id = b.account_id\nGROUP BY cc.cost_center_code, cc.cost_center_name\nORDER BY variance_eur DESC, cc.cost_center_code;\n",
+  "verificationSql": null,
+  "hints": [
+    "Aggregate budgets and actuals separately to the same grain (cost center and account) before joining them.",
+    "Start from the budget side and LEFT JOIN actuals, using COALESCE to turn missing actuals into zero.",
+    "Roll the joined lines up to cost center and compute the variance from the rolled up sums."
+  ],
+  "explanation": "Budgets and ledger entries live at different grains, so each is aggregated to cost center and account first. Driving the join from the budget keeps only budgeted lines, which is the like for like comparison the controller asked for, and COALESCE avoids losing budget lines with no spend. The final aggregation rolls the lines up per cost center.",
+  "estimatedMinutes": 30
+}

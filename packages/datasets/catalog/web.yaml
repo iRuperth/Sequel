@@ -1,0 +1,249 @@
+dataset: web
+tables:
+  - name: campaigns
+    description: >-
+      Paid and owned marketing campaigns with their UTM tags. Brand search runs all year; seasonal campaigns run a
+      few days to a few months. Budgets are in euro.
+    grain: One row per campaign flight
+    ownerTeam: Growth Marketing
+    tags: [marketing, attribution]
+    columns:
+      - name: campaign_id
+        description: Surrogate key of the campaign.
+        pii: false
+      - name: campaign_name
+        description: Name used in the marketing plan.
+        pii: false
+        exampleValues: [Black Friday (Social prospecting)]
+      - name: channel
+        description: Marketing channel.
+        pii: false
+        exampleValues: [paid_search, paid_social, display, email, affiliate, video]
+      - name: utm_source
+        description: utm_source tag on campaign links.
+        pii: false
+      - name: utm_medium
+        description: utm_medium tag on campaign links.
+        pii: false
+      - name: utm_campaign
+        description: utm_campaign tag, unique per campaign.
+        pii: false
+      - name: budget_amount
+        description: Approved media budget.
+        pii: false
+      - name: currency
+        description: Currency of the budget.
+        pii: false
+      - name: starts_on
+        description: First day of the flight.
+        pii: false
+      - name: ends_on
+        description: Last day of the flight. Null while the campaign is still running.
+        pii: false
+
+  - name: sessions
+    description: >-
+      Website sessions built by the sessionisation job from raw hits (30 minutes inactivity timeout). Known issues:
+      automated clients are not filtered, they can be recognised by user_agent_family values such as HeadlessChrome,
+      python-requests, curl, Scrapy and PhantomJS and by many page views in a few seconds; and the job drops a small
+      share of sessions whose events are still loaded into events.
+    grain: One row per session
+    ownerTeam: Growth Engineering
+    tags: [clickstream, sessions]
+    columns:
+      - name: session_id
+        description: Surrogate key of the session, increasing with started_at. Ids of dropped sessions leave gaps.
+        pii: false
+      - name: visitor_id
+        description: Pseudonymous first party cookie id of the browser.
+        pii: true
+      - name: customer_id
+        description: Logged in customer, matching ecommerce.customers.customer_id. Null for anonymous sessions.
+        pii: false
+      - name: campaign_id
+        description: Campaign attributed by UTM parameters. Null for non campaign traffic.
+        pii: false
+      - name: traffic_source
+        description: Acquisition source of the session.
+        pii: false
+        exampleValues: [direct, organic_search, referral, campaign]
+      - name: referrer_domain
+        description: Referring search engine or website. Null for direct and campaign traffic.
+        pii: false
+        exampleValues: [google, pricecompare.example.eu]
+      - name: landing_path
+        description: First page of the session.
+        pii: false
+        exampleValues: [/, /products/wireless-headphones-pro]
+      - name: device_type
+        description: Device class.
+        pii: false
+        exampleValues: [desktop, mobile, tablet]
+      - name: browser
+        description: Browser name.
+        pii: false
+      - name: operating_system
+        description: Operating system name.
+        pii: false
+      - name: user_agent_family
+        description: User agent family parsed from the request. Equals the browser for human traffic.
+        pii: false
+        exampleValues: [Chrome, Mobile Safari, HeadlessChrome]
+      - name: country_code
+        description: Country from IP geolocation.
+        pii: false
+      - name: started_at
+        description: Timestamp (UTC) of the first hit.
+        pii: false
+      - name: ended_at
+        description: Timestamp (UTC) of the last hit.
+        pii: false
+      - name: page_view_count
+        description: Number of page views in the session.
+        pii: false
+
+  - name: page_views
+    description: Page views of each session in order. time_on_page_ms is unknown for the last page of a session.
+    grain: One row per page view
+    ownerTeam: Growth Engineering
+    tags: [clickstream, pages]
+    columns:
+      - name: page_view_id
+        description: Surrogate key of the page view.
+        pii: false
+      - name: session_id
+        description: Session of the page view.
+        pii: false
+      - name: page_path
+        description: Path of the page without query string.
+        pii: false
+        exampleValues: [/, /category/shoes, /checkout]
+      - name: page_type
+        description: Template type of the page.
+        pii: false
+        exampleValues: [home, product, category, search, cart, checkout]
+      - name: referrer_path
+        description: Previous page in the same session. Null for the landing page.
+        pii: false
+      - name: viewed_at
+        description: Timestamp (UTC) of the page view.
+        pii: false
+      - name: time_on_page_ms
+        description: Milliseconds until the next page view. Null for the last page of the session.
+        pii: false
+
+  - name: events
+    description: >-
+      Product analytics events sent by the website tracker, with event specific attributes in properties. There is
+      no foreign key to sessions: events arrive from a separate stream, and events of dropped sessions remain as
+      orphans.
+    grain: One row per tracked event
+    ownerTeam: Growth Engineering
+    tags: [clickstream, events, product_analytics]
+    columns:
+      - name: event_id
+        description: Surrogate key of the event.
+        pii: false
+      - name: session_id
+        description: Session id stamped by the tracker. Usually matches web.sessions, see the orphan events issue.
+        pii: false
+      - name: visitor_id
+        description: Pseudonymous cookie id, same as on sessions.
+        pii: true
+      - name: event_name
+        description: Name of the event.
+        pii: false
+        exampleValues: [session_start, view_item, add_to_cart, begin_checkout, purchase]
+      - name: page_path
+        description: Page where the event fired. Null for session_start.
+        pii: false
+      - name: event_at
+        description: Timestamp (UTC) of the event.
+        pii: false
+      - name: properties
+        description: JSON attributes of the event, for example item_id, value and currency for purchases.
+        pii: false
+        exampleValues:
+          ['{"value": 129.5, "currency": "EUR", "items": 3, "transaction_id": "WEB-0000042"}']
+
+  - name: experiments
+    description: A/B tests run on the website and their primary metric. Running experiments have a null ended_at.
+    grain: One row per experiment
+    ownerTeam: Experimentation Platform
+    tags: [experimentation]
+    columns:
+      - name: experiment_id
+        description: Surrogate key of the experiment.
+        pii: false
+      - name: experiment_key
+        description: Stable key used by the feature flag service.
+        pii: false
+        exampleValues: [checkout_one_page]
+      - name: experiment_name
+        description: Human readable name.
+        pii: false
+      - name: hypothesis
+        description: Hypothesis registered before launch.
+        pii: false
+      - name: primary_metric
+        description: Decision metric.
+        pii: false
+        exampleValues: [purchase_conversion, add_to_cart_rate]
+      - name: status
+        description: Experiment status.
+        pii: false
+        exampleValues: [running, completed, stopped]
+      - name: traffic_allocation
+        description: Share of eligible visitors enrolled, between 0 and 1.
+        pii: false
+      - name: started_at
+        description: Timestamp (UTC) when enrolment started.
+        pii: false
+      - name: ended_at
+        description: Timestamp (UTC) when the experiment ended. Null while running.
+        pii: false
+
+  - name: experiment_assignments
+    description: Visitors enrolled in each experiment with their variant. A visitor is assigned once per experiment, on the first eligible session.
+    grain: One row per experiment and visitor
+    ownerTeam: Experimentation Platform
+    tags: [experimentation]
+    columns:
+      - name: assignment_id
+        description: Surrogate key of the assignment.
+        pii: false
+      - name: experiment_id
+        description: Experiment.
+        pii: false
+      - name: visitor_id
+        description: Pseudonymous visitor enrolled.
+        pii: true
+      - name: variant
+        description: Variant shown to the visitor.
+        pii: false
+        exampleValues: [control, treatment]
+      - name: assigned_at
+        description: Timestamp (UTC) of enrolment.
+        pii: false
+links:
+  - fromTable: events
+    fromColumn: session_id
+    toTable: sessions
+    toColumn: session_id
+    description: Events reference the session that produced them, without a foreign key; orphan events exist.
+  - fromTable: events
+    fromColumn: visitor_id
+    toTable: sessions
+    toColumn: visitor_id
+    description: Events and sessions share the pseudonymous visitor id.
+  - fromTable: experiment_assignments
+    fromColumn: visitor_id
+    toTable: sessions
+    toColumn: visitor_id
+    description: Assigned visitors can be followed through their sessions.
+  - fromTable: sessions
+    fromColumn: customer_id
+    toSchema: ecommerce
+    toTable: customers
+    toColumn: customer_id
+    description: Logged in sessions identify the online store customer.

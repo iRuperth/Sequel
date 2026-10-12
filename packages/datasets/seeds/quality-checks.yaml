@@ -1,0 +1,257 @@
+checks:
+  - key: fintech-transactions-merchant-mapped
+    name: Card transactions mapped to a merchant
+    description: >-
+      Every authorisation should be linked to a merchant by the enrichment service. Rows with a null
+      merchant_id drop out of merchant and category analytics. Known issue: the enrichment vendor fails on a
+      small share of descriptors, so this check is expected to fail until the fix ships.
+    kind: not_null
+    targetSchema: fintech
+    targetTable: transactions
+    targetColumn: merchant_id
+    config:
+      min: null
+      max: null
+      maxAgeHours: null
+      acceptedValues: []
+      sql: null
+    severity: medium
+    isEnabled: true
+    cronExpression: "0 6 * * *"
+
+  - key: fintech-transactions-id-unique
+    name: Transaction ids are unique
+    description: >-
+      transaction_id is the primary key used by fraud alerts, disputes and the ledger. Duplicates would double
+      count volume in every downstream model.
+    kind: unique
+    targetSchema: fintech
+    targetTable: transactions
+    targetColumn: transaction_id
+    config:
+      min: null
+      max: null
+      maxAgeHours: null
+      acceptedValues: []
+      sql: null
+    severity: critical
+    isEnabled: true
+    cronExpression: "0 6 * * *"
+
+  - key: fintech-transactions-status-values
+    name: Transaction status uses the agreed lifecycle values
+    description: >-
+      The authorisation lifecycle has four states. Any other value means the processor feed changed without
+      notice and the settlement reports will misclassify volume.
+    kind: accepted_values
+    targetSchema: fintech
+    targetTable: transactions
+    targetColumn: status
+    config:
+      min: null
+      max: null
+      maxAgeHours: null
+      acceptedValues:
+        - authorized
+        - settled
+        - declined
+        - reversed
+      sql: null
+    severity: high
+    isEnabled: true
+    cronExpression: "0 6 * * *"
+
+  - key: fintech-transactions-freshness
+    name: Card transactions feed is fresh
+    description: >-
+      Alerts when the newest authorisation is older than the threshold. The sandbox holds a frozen snapshot that
+      ends on the dataset as of date, so the threshold is one year instead of the six hours used in production.
+    kind: freshness
+    targetSchema: fintech
+    targetTable: transactions
+    targetColumn: created_at
+    config:
+      min: null
+      max: null
+      maxAgeHours: 8760
+      acceptedValues: []
+      sql: null
+    severity: high
+    isEnabled: true
+    cronExpression: "0 * * * *"
+
+  - key: fintech-fx-rates-row-count
+    name: FX reference rates loaded for every day
+    description: >-
+      One rate per day for each of the eight supported currencies over the two year window. A count outside the
+      range means a missing day or a duplicated load.
+    kind: row_count_between
+    targetSchema: fintech
+    targetTable: fx_rates
+    targetColumn: null
+    config:
+      min: 5800
+      max: 5900
+      maxAgeHours: null
+      acceptedValues: []
+      sql: null
+    severity: medium
+    isEnabled: true
+    cronExpression: "30 6 * * *"
+
+  - key: fintech-ledger-journals-balanced
+    name: Ledger journals balance
+    description: >-
+      Every journal in the double entry ledger must have equal debits and credits. The query returns the journals
+      that do not balance; the check fails when it returns any row.
+    kind: custom_sql
+    targetSchema: fintech
+    targetTable: ledger_postings
+    targetColumn: null
+    config:
+      min: null
+      max: null
+      maxAgeHours: null
+      acceptedValues: []
+      sql: |
+        SELECT journal_id,
+               SUM(CASE WHEN entry_side = 'debit' THEN amount ELSE -amount END) AS imbalance
+        FROM fintech.ledger_postings
+        GROUP BY journal_id
+        HAVING SUM(CASE WHEN entry_side = 'debit' THEN amount ELSE -amount END) <> 0
+    severity: critical
+    isEnabled: true
+    cronExpression: "0 7 * * *"
+
+  - key: fintech-fraud-disputes-have-alert
+    name: Fraud disputes have a fraud alert
+    description: >-
+      A fraud chargeback on a transaction that never raised an alert points to a gap in the rules engine. The query
+      returns those disputes; the check fails when it returns any row.
+    kind: custom_sql
+    targetSchema: fintech
+    targetTable: disputes
+    targetColumn: null
+    config:
+      min: null
+      max: null
+      maxAgeHours: null
+      acceptedValues: []
+      sql: |
+        SELECT d.dispute_id, d.transaction_id, d.opened_at
+        FROM fintech.disputes AS d
+        WHERE d.reason = 'fraud'
+          AND NOT EXISTS (
+            SELECT 1 FROM fintech.fraud_alerts AS a WHERE a.transaction_id = d.transaction_id
+          )
+    severity: medium
+    isEnabled: true
+    cronExpression: "0 8 * * 1"
+
+  - key: ecommerce-orders-status-values
+    name: Order status uses the fulfilment lifecycle values
+    description: >-
+      Orders move through pending payment, paid, shipped and delivered, or end cancelled or returned. Any other
+      value breaks the fulfilment funnel reports.
+    kind: accepted_values
+    targetSchema: ecommerce
+    targetTable: orders
+    targetColumn: status
+    config:
+      min: null
+      max: null
+      maxAgeHours: null
+      acceptedValues:
+        - pending_payment
+        - paid
+        - shipped
+        - delivered
+        - cancelled
+        - returned
+      sql: null
+    severity: high
+    isEnabled: true
+    cronExpression: "15 6 * * *"
+
+  - key: ecommerce-customers-email-case-duplicates
+    name: No duplicate customers by email casing
+    description: >-
+      Legacy sign ups stored emails as typed, so the same shopper can exist twice with different casing. The query
+      returns every normalised email used by more than one customer; the check fails when it returns any row.
+    kind: custom_sql
+    targetSchema: ecommerce
+    targetTable: customers
+    targetColumn: email
+    config:
+      min: null
+      max: null
+      maxAgeHours: null
+      acceptedValues: []
+      sql: |
+        SELECT LOWER(email) AS normalized_email, COUNT(*) AS accounts
+        FROM ecommerce.customers
+        GROUP BY LOWER(email)
+        HAVING COUNT(*) > 1
+    severity: low
+    isEnabled: true
+    cronExpression: "0 9 * * 1"
+
+  - key: web-events-session-exists
+    name: Clickstream events belong to a known session
+    description: >-
+      The sessionisation job drops some sessions while their events are still loaded, leaving orphan events that
+      inflate event counts. The query returns events whose session_id has no session; the check fails when it
+      returns any row.
+    kind: custom_sql
+    targetSchema: web
+    targetTable: events
+    targetColumn: session_id
+    config:
+      min: null
+      max: null
+      maxAgeHours: null
+      acceptedValues: []
+      sql: |
+        SELECT e.event_id, e.session_id, e.event_name, e.event_at
+        FROM web.events AS e
+        WHERE NOT EXISTS (SELECT 1 FROM web.sessions AS s WHERE s.session_id = e.session_id)
+    severity: medium
+    isEnabled: true
+    cronExpression: "0 5 * * *"
+
+  - key: hr-employees-id-unique
+    name: Employee ids are unique
+    description: >-
+      employee_id is referenced by salaries, reviews and leave requests and must identify one person.
+    kind: unique
+    targetSchema: hr
+    targetTable: employees
+    targetColumn: employee_id
+    config:
+      min: null
+      max: null
+      maxAgeHours: null
+      acceptedValues: []
+      sql: null
+    severity: critical
+    isEnabled: true
+    cronExpression: "0 4 * * *"
+
+  - key: finance-invoice-lines-volume
+    name: Invoice lines volume within expected range
+    description: >-
+      The ERP extract usually delivers between ten and forty thousand invoice lines for the two year window. A
+      number outside the range indicates a partial or duplicated extract.
+    kind: row_count_between
+    targetSchema: finance
+    targetTable: invoice_lines
+    targetColumn: null
+    config:
+      min: 10000
+      max: 40000
+      maxAgeHours: null
+      acceptedValues: []
+      sql: null
+    severity: medium
+    isEnabled: true
+    cronExpression: "0 3 * * *"

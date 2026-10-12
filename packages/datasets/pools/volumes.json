@@ -1,0 +1,30 @@
+{
+  "windowMonths": 24,
+  "fintech": {
+    "accountHolders": 5000,
+    "merchants": 1500,
+    "transactions": 250000,
+    "transfers": 30000,
+    "fraudAlerts": 2000,
+    "disputes": 800,
+    "loans": 1500
+  },
+  "ecommerce": {
+    "customers": 15000,
+    "products": 1200,
+    "orders": 50000,
+    "meanItemsPerOrder": 3
+  },
+  "hr": {
+    "employees": 2000,
+    "companyAgeMonths": 108
+  },
+  "web": {
+    "sessions": 90000,
+    "visitorsPerSession": 0.62,
+    "events": 500000
+  },
+  "finance": {
+    "invoices": 5600
+  }
+}

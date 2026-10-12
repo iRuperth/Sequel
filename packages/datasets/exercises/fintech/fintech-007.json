@@ -1,0 +1,63 @@
+{
+  "key": "fintech-007",
+  "order": 7,
+  "title": "Model a chargebacks table from resolved disputes",
+  "track": "data_engineer",
+  "difficulty": "advanced",
+  "topics": ["data_modelling_ddl", "dml", "joins"],
+  "datasetSlugs": ["fintech"],
+  "mode": "scratch",
+  "stakeholder": {
+    "name": "Ricardo Silva",
+    "role": "Analytics Engineering Manager",
+    "team": "Payments Data Platform"
+  },
+  "businessContext": "Finance wants a clean chargebacks model instead of filtering fintech.disputes in every report. A chargeback is a dispute that has been resolved by the card network, either won or lost by the bank. Ricardo asks you to prototype the table in your scratch schema: create it with sensible types and constraints and load it from the current disputes. The sandbox does not grant REFERENCES on dataset tables, so do not add foreign keys to fintech tables.",
+  "requirements": [
+    "Create a table named chargebacks in your scratch schema with columns chargeback_id, transaction_id, card_id, merchant_id, reason, outcome, amount, currency, opened_on, resolved_on and days_to_resolve.",
+    "chargeback_id is the primary key and takes the dispute_id value; outcome only accepts 'won' or 'lost'; amount is numeric(14,2) and must be positive.",
+    "Populate it with every dispute whose status is won or lost: card_id and merchant_id come from the disputed transaction, amount and currency from the dispute, opened_on and resolved_on are the UTC dates of opened_at and resolved_at.",
+    "days_to_resolve is resolved_on minus opened_on in days."
+  ],
+  "acceptanceCriteria": [
+    "The verification query returns the same counts, totals and averages per outcome and currency as the reference model.",
+    "Disputes that are open, under review or withdrawn are not loaded.",
+    "merchant_id stays null when the disputed transaction has no mapped merchant."
+  ],
+  "expectedColumns": [
+    {
+      "name": "outcome",
+      "typeHint": "text"
+    },
+    {
+      "name": "currency",
+      "typeHint": "text"
+    },
+    {
+      "name": "chargeback_count",
+      "typeHint": "integer"
+    },
+    {
+      "name": "total_amount",
+      "typeHint": "decimal"
+    },
+    {
+      "name": "avg_days_to_resolve",
+      "typeHint": "decimal"
+    },
+    {
+      "name": "with_mapped_merchant",
+      "typeHint": "integer"
+    }
+  ],
+  "orderMatters": true,
+  "referenceSql": "CREATE TABLE chargebacks (\n  chargeback_id bigint PRIMARY KEY,\n  transaction_id bigint NOT NULL,\n  card_id bigint NOT NULL,\n  merchant_id bigint,\n  reason text NOT NULL,\n  outcome text NOT NULL CHECK (outcome IN ('won', 'lost')),\n  amount numeric(14, 2) NOT NULL CHECK (amount > 0),\n  currency char(3) NOT NULL,\n  opened_on date NOT NULL,\n  resolved_on date NOT NULL,\n  days_to_resolve integer NOT NULL\n);\n\nINSERT INTO chargebacks (\n  chargeback_id, transaction_id, card_id, merchant_id, reason, outcome,\n  amount, currency, opened_on, resolved_on, days_to_resolve\n)\nSELECT d.dispute_id,\n       d.transaction_id,\n       t.card_id,\n       t.merchant_id,\n       d.reason,\n       d.status,\n       d.disputed_amount,\n       d.currency,\n       (d.opened_at AT TIME ZONE 'UTC')::date,\n       (d.resolved_at AT TIME ZONE 'UTC')::date,\n       (d.resolved_at AT TIME ZONE 'UTC')::date - (d.opened_at AT TIME ZONE 'UTC')::date\nFROM fintech.disputes AS d\nJOIN fintech.transactions AS t ON t.transaction_id = d.transaction_id\nWHERE d.status IN ('won', 'lost');\n",
+  "verificationSql": "SELECT outcome,\n       currency,\n       COUNT(*) AS chargeback_count,\n       SUM(amount) AS total_amount,\n       ROUND(AVG(days_to_resolve), 1) AS avg_days_to_resolve,\n       COUNT(merchant_id) AS with_mapped_merchant\nFROM chargebacks\nGROUP BY outcome, currency\nORDER BY outcome, currency;\n",
+  "hints": [
+    "Write the CREATE TABLE first: a PRIMARY KEY on chargeback_id and a CHECK (outcome IN ('won', 'lost')) cover the constraints.",
+    "INSERT INTO chargebacks (...) SELECT ... FROM fintech.disputes JOIN fintech.transactions lets you load it in one statement.",
+    "Subtracting two dates in PostgreSQL returns an integer number of days; convert the timestamps with AT TIME ZONE 'UTC' before casting to date."
+  ],
+  "explanation": "Modelling the table explicitly documents the grain (one row per resolved dispute) and enforces it with a primary key and a check constraint on the outcome. Loading it with INSERT ... SELECT keeps the logic in one statement, and pulling card_id and merchant_id from the transaction denormalises the attributes finance filters on most. Date arithmetic on UTC dates gives a stable days_to_resolve.",
+  "estimatedMinutes": 30
+}

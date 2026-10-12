@@ -1,0 +1,61 @@
+{
+  "key": "finance-001",
+  "order": 1,
+  "title": "Invoices whose header does not match their lines",
+  "track": "data_engineer",
+  "difficulty": "intermediate",
+  "topics": ["data_quality", "aggregation", "joins"],
+  "datasetSlugs": ["finance"],
+  "mode": "read",
+  "stakeholder": {
+    "name": "Nadia Kowalski",
+    "role": "Accounts Payable Manager",
+    "team": "Finance Operations"
+  },
+  "businessContext": "Month end close is blocked by a reconciliation difference between the invoice register and the general ledger. The ledger is posted from invoice lines, so Nadia suspects invoices whose header subtotal was not updated after a line was added or edited. She needs every invoice where the header subtotal differs from the sum of its line amounts.",
+  "requirements": [
+    "Sum finance.invoice_lines.line_amount per invoice and compare it with finance.invoices.subtotal_amount.",
+    "Return invoices where the two values differ, with the invoice number, invoice type, counterparty, header subtotal, lines subtotal and the difference (header minus lines)."
+  ],
+  "acceptanceCriteria": [
+    "Columns are invoice_number, invoice_type, counterparty_name, header_subtotal, lines_subtotal and difference, in that order.",
+    "difference is never zero.",
+    "Each invoice appears at most once."
+  ],
+  "expectedColumns": [
+    {
+      "name": "invoice_number",
+      "typeHint": "text"
+    },
+    {
+      "name": "invoice_type",
+      "typeHint": "text"
+    },
+    {
+      "name": "counterparty_name",
+      "typeHint": "text"
+    },
+    {
+      "name": "header_subtotal",
+      "typeHint": "decimal"
+    },
+    {
+      "name": "lines_subtotal",
+      "typeHint": "decimal"
+    },
+    {
+      "name": "difference",
+      "typeHint": "decimal"
+    }
+  ],
+  "orderMatters": false,
+  "referenceSql": "WITH line_totals AS (\n  SELECT invoice_id, SUM(line_amount) AS lines_subtotal\n  FROM finance.invoice_lines\n  GROUP BY invoice_id\n)\nSELECT i.invoice_number,\n       i.invoice_type,\n       i.counterparty_name,\n       i.subtotal_amount AS header_subtotal,\n       l.lines_subtotal,\n       i.subtotal_amount - l.lines_subtotal AS difference\nFROM finance.invoices AS i\nJOIN line_totals AS l ON l.invoice_id = i.invoice_id\nWHERE i.subtotal_amount <> l.lines_subtotal\nORDER BY i.invoice_number;\n",
+  "verificationSql": null,
+  "hints": [
+    "Aggregate the lines per invoice first, then join the totals back to the invoice header.",
+    "Compare header and lines with <> after the aggregation, not inside it.",
+    "Subtract lines_subtotal from subtotal_amount to get a signed difference."
+  ],
+  "explanation": "Aggregating lines in a CTE produces one row per invoice that can be joined to the header without duplicating it. The inequality then isolates the invoices that will not reconcile, and the signed difference tells Finance Operations whether the header is overstated or understated.",
+  "estimatedMinutes": 15
+}

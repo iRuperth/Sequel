@@ -1,0 +1,40 @@
+{
+  "name": "@sequel/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --clear-screen=false src/main.ts",
+    "start": "tsx src/main.ts",
+    "build": "tsup",
+    "lint": "eslint --max-warnings=0 src",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.3.1",
+    "@fastify/swagger": "^9.9.2",
+    "@fastify/swagger-ui": "^6.1.2",
+    "@sequel/config": "workspace:*",
+    "@sequel/contracts": "workspace:*",
+    "@sequel/copy": "workspace:*",
+    "@sequel/core": "workspace:*",
+    "@sequel/queue": "workspace:*",
+    "fastify": "^5.12.5",
+    "fastify-type-provider-zod": "^7.0.0",
+    "pino": "^10.4.0",
+    "zod": "^4.6.5",
+    "@sequel/datasets": "workspace:*"
+  },
+  "devDependencies": {
+    "@sequel/eslint-config": "workspace:*",
+    "@sequel/tsconfig": "workspace:*",
+    "@types/node": "^24.0.0",
+    "eslint": "^10.12.0",
+    "pino-pretty": "^13.2.0",
+    "tsup": "^8.5.1",
+    "tsx": "^4.23.15",
+    "typescript": "5.9.3",
+    "vitest": "^5.0.3"
+  }
+}

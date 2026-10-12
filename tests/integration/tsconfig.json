@@ -1,0 +1,4 @@
+{
+  "extends": "@sequel/tsconfig/node.json",
+  "include": ["src"]
+}

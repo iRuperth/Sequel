@@ -1,0 +1,589 @@
+{
+  "orderNumberPrefix": "SO",
+  "skuPrefix": "SKU",
+  "paymentReferencePrefix": "psp_",
+  "preWindowCustomerShare": 0.35,
+  "preWindowMonths": 36,
+  "defaultCurrency": "EUR",
+  "storeCurrencies": [
+    { "countryCode": "GB", "currency": "GBP" },
+    { "countryCode": "US", "currency": "USD" },
+    { "countryCode": "CH", "currency": "CHF" },
+    { "countryCode": "SE", "currency": "SEK" },
+    { "countryCode": "PL", "currency": "PLN" }
+  ],
+  "categories": [
+    {
+      "name": "Electronics",
+      "slug": "electronics",
+      "children": [
+        {
+          "name": "Headphones and Audio",
+          "slug": "headphones-audio",
+          "weight": 9,
+          "meanPrice": 89,
+          "priceSigma": 0.6,
+          "weightGrams": [120, 900],
+          "nouns": [
+            "Wireless Headphones",
+            "Earbuds",
+            "Bluetooth Speaker",
+            "Soundbar",
+            "Studio Monitor Headphones"
+          ]
+        },
+        {
+          "name": "Phone Accessories",
+          "slug": "phone-accessories",
+          "weight": 10,
+          "meanPrice": 24,
+          "priceSigma": 0.5,
+          "weightGrams": [30, 300],
+          "nouns": [
+            "Phone Case",
+            "Fast Charger",
+            "Screen Protector",
+            "Power Bank",
+            "Charging Cable"
+          ]
+        },
+        {
+          "name": "Smart Home",
+          "slug": "smart-home",
+          "weight": 5,
+          "meanPrice": 69,
+          "priceSigma": 0.6,
+          "weightGrams": [150, 1500],
+          "nouns": ["Smart Plug", "Video Doorbell", "Smart Bulb Kit", "Indoor Camera", "Thermostat"]
+        },
+        {
+          "name": "Computer Accessories",
+          "slug": "computer-accessories",
+          "weight": 7,
+          "meanPrice": 45,
+          "priceSigma": 0.7,
+          "weightGrams": [80, 1800],
+          "nouns": ["Mechanical Keyboard", "Wireless Mouse", "USB-C Hub", "Laptop Stand", "Webcam"]
+        }
+      ]
+    },
+    {
+      "name": "Home and Kitchen",
+      "slug": "home-kitchen",
+      "children": [
+        {
+          "name": "Cookware",
+          "slug": "cookware",
+          "weight": 6,
+          "meanPrice": 54,
+          "priceSigma": 0.6,
+          "weightGrams": [400, 4000],
+          "nouns": ["Frying Pan", "Saucepan Set", "Cast Iron Skillet", "Dutch Oven", "Wok"]
+        },
+        {
+          "name": "Small Appliances",
+          "slug": "small-appliances",
+          "weight": 6,
+          "meanPrice": 79,
+          "priceSigma": 0.6,
+          "weightGrams": [900, 6000],
+          "nouns": ["Coffee Grinder", "Kettle", "Toaster", "Hand Blender", "Espresso Machine"]
+        },
+        {
+          "name": "Home Decor",
+          "slug": "home-decor",
+          "weight": 5,
+          "meanPrice": 32,
+          "priceSigma": 0.7,
+          "weightGrams": [150, 3000],
+          "nouns": ["Table Lamp", "Scented Candle", "Throw Blanket", "Wall Mirror", "Plant Pot"]
+        },
+        {
+          "name": "Bedding and Bath",
+          "slug": "bedding-bath",
+          "weight": 5,
+          "meanPrice": 39,
+          "priceSigma": 0.6,
+          "weightGrams": [300, 2500],
+          "nouns": ["Duvet Cover", "Bath Towel Set", "Pillow", "Fitted Sheet", "Bath Mat"]
+        }
+      ]
+    },
+    {
+      "name": "Fashion",
+      "slug": "fashion",
+      "children": [
+        {
+          "name": "Womens Clothing",
+          "slug": "womens-clothing",
+          "weight": 9,
+          "meanPrice": 42,
+          "priceSigma": 0.5,
+          "weightGrams": [150, 900],
+          "nouns": [
+            "Linen Shirt",
+            "Knit Sweater",
+            "Midi Dress",
+            "Denim Jacket",
+            "Wide Leg Trousers"
+          ]
+        },
+        {
+          "name": "Mens Clothing",
+          "slug": "mens-clothing",
+          "weight": 8,
+          "meanPrice": 44,
+          "priceSigma": 0.5,
+          "weightGrams": [150, 1100],
+          "nouns": ["Oxford Shirt", "Chino Trousers", "Merino Sweater", "Rain Jacket", "Polo Shirt"]
+        },
+        {
+          "name": "Shoes",
+          "slug": "shoes",
+          "weight": 6,
+          "meanPrice": 79,
+          "priceSigma": 0.4,
+          "weightGrams": [500, 1400],
+          "nouns": ["Running Shoes", "Leather Boots", "Canvas Sneakers", "Loafers", "Trail Shoes"]
+        },
+        {
+          "name": "Bags and Accessories",
+          "slug": "bags-accessories",
+          "weight": 4,
+          "meanPrice": 36,
+          "priceSigma": 0.7,
+          "weightGrams": [80, 1500],
+          "nouns": ["Backpack", "Leather Wallet", "Tote Bag", "Sunglasses", "Wool Scarf"]
+        }
+      ]
+    },
+    {
+      "name": "Sports and Outdoors",
+      "slug": "sports-outdoors",
+      "children": [
+        {
+          "name": "Fitness Equipment",
+          "slug": "fitness-equipment",
+          "weight": 4,
+          "meanPrice": 49,
+          "priceSigma": 0.8,
+          "weightGrams": [300, 12000],
+          "nouns": [
+            "Yoga Mat",
+            "Adjustable Dumbbells",
+            "Resistance Bands",
+            "Kettlebell",
+            "Foam Roller"
+          ]
+        },
+        {
+          "name": "Camping and Hiking",
+          "slug": "camping-hiking",
+          "weight": 3,
+          "meanPrice": 64,
+          "priceSigma": 0.8,
+          "weightGrams": [200, 5000],
+          "nouns": [
+            "Two Person Tent",
+            "Sleeping Bag",
+            "Hiking Poles",
+            "Headlamp",
+            "Insulated Bottle"
+          ]
+        },
+        {
+          "name": "Cycling",
+          "slug": "cycling",
+          "weight": 2,
+          "meanPrice": 58,
+          "priceSigma": 0.8,
+          "weightGrams": [100, 3000],
+          "nouns": ["Bike Helmet", "Bike Lights Set", "Cycling Gloves", "Saddle Bag", "Floor Pump"]
+        }
+      ]
+    },
+    {
+      "name": "Beauty and Personal Care",
+      "slug": "beauty-personal-care",
+      "children": [
+        {
+          "name": "Skincare",
+          "slug": "skincare",
+          "weight": 7,
+          "meanPrice": 22,
+          "priceSigma": 0.5,
+          "weightGrams": [50, 400],
+          "nouns": ["Moisturiser", "Vitamin C Serum", "Cleanser", "Sunscreen SPF 50", "Night Cream"]
+        },
+        {
+          "name": "Hair Care",
+          "slug": "hair-care",
+          "weight": 4,
+          "meanPrice": 18,
+          "priceSigma": 0.6,
+          "weightGrams": [80, 900],
+          "nouns": ["Shampoo", "Conditioner", "Hair Dryer", "Hair Oil", "Styling Cream"]
+        },
+        {
+          "name": "Fragrance",
+          "slug": "fragrance",
+          "weight": 2,
+          "meanPrice": 58,
+          "priceSigma": 0.5,
+          "weightGrams": [100, 400],
+          "nouns": ["Eau de Parfum", "Eau de Toilette", "Body Mist", "Discovery Set"]
+        }
+      ]
+    },
+    {
+      "name": "Books and Stationery",
+      "slug": "books-stationery",
+      "children": [
+        {
+          "name": "Books",
+          "slug": "books",
+          "weight": 5,
+          "meanPrice": 17,
+          "priceSigma": 0.4,
+          "weightGrams": [200, 1200],
+          "nouns": [
+            "Hardback Novel",
+            "Cookbook",
+            "Travel Guide",
+            "Business Book",
+            "Childrens Picture Book"
+          ]
+        },
+        {
+          "name": "Stationery",
+          "slug": "stationery",
+          "weight": 3,
+          "meanPrice": 12,
+          "priceSigma": 0.6,
+          "weightGrams": [40, 800],
+          "nouns": [
+            "Dotted Notebook",
+            "Fountain Pen",
+            "Desk Planner",
+            "Marker Set",
+            "Sticky Notes Pack"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Toys and Games",
+      "slug": "toys-games",
+      "children": [
+        {
+          "name": "Board Games",
+          "slug": "board-games",
+          "weight": 3,
+          "meanPrice": 34,
+          "priceSigma": 0.5,
+          "weightGrams": [400, 2500],
+          "nouns": [
+            "Strategy Board Game",
+            "Party Game",
+            "Jigsaw Puzzle",
+            "Card Game",
+            "Family Quiz Game"
+          ]
+        },
+        {
+          "name": "Kids Toys",
+          "slug": "kids-toys",
+          "weight": 3,
+          "meanPrice": 27,
+          "priceSigma": 0.6,
+          "weightGrams": [100, 3000],
+          "nouns": [
+            "Building Blocks Set",
+            "Plush Toy",
+            "Wooden Train Set",
+            "Art Kit",
+            "Remote Control Car"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Grocery and Gourmet",
+      "slug": "grocery-gourmet",
+      "children": [
+        {
+          "name": "Coffee and Tea",
+          "slug": "coffee-tea",
+          "weight": 5,
+          "meanPrice": 14,
+          "priceSigma": 0.5,
+          "weightGrams": [100, 1000],
+          "nouns": [
+            "Whole Bean Coffee",
+            "Green Tea Selection",
+            "Coffee Capsules",
+            "Chai Blend",
+            "Cold Brew Pack"
+          ]
+        },
+        {
+          "name": "Pantry",
+          "slug": "pantry",
+          "weight": 3,
+          "meanPrice": 9,
+          "priceSigma": 0.5,
+          "weightGrams": [100, 1500],
+          "nouns": ["Olive Oil", "Pasta Selection", "Hot Sauce", "Granola", "Spice Set"]
+        }
+      ]
+    }
+  ],
+  "brands": [
+    "Aerolite",
+    "Brookline",
+    "Calder",
+    "Dovetail",
+    "Everhart",
+    "Fernwood",
+    "Glimmer",
+    "Halden",
+    "Ironleaf",
+    "Kinfolk Home",
+    "Lumora",
+    "Mistvale",
+    "Nordhaus",
+    "Oakhaven",
+    "Pallas",
+    "Quarry Lane",
+    "Rivermark",
+    "Solace",
+    "Trailhead",
+    "Umbra",
+    "Vellum",
+    "Wildcrest",
+    "Yonder",
+    "Zenvo",
+    "Arden Studio",
+    "Bellweather",
+    "Coastline",
+    "Driftworks",
+    "Emberly",
+    "Foundry Co"
+  ],
+  "productAdjectives": [
+    "Classic",
+    "Essential",
+    "Pro",
+    "Compact",
+    "Premium",
+    "Everyday",
+    "Lightweight",
+    "Organic",
+    "Recycled",
+    "Signature",
+    "Ultra",
+    "Original",
+    "Deluxe",
+    "Eco",
+    "Urban",
+    "Heritage",
+    "Smart",
+    "Travel",
+    "Studio",
+    "Max"
+  ],
+  "warehouses": [
+    { "code": "AMS1", "countryCode": "NL", "weight": 40 },
+    { "code": "BER1", "countryCode": "DE", "weight": 25 },
+    { "code": "MAD1", "countryCode": "ES", "weight": 20 },
+    { "code": "LHR1", "countryCode": "GB", "weight": 15 }
+  ],
+  "carriers": [
+    { "name": "SwiftParcel", "trackingPrefix": "SP", "weight": 38 },
+    { "name": "EuroExpress Logistics", "trackingPrefix": "EX", "weight": 27 },
+    { "name": "GreenRoute Delivery", "trackingPrefix": "GR", "weight": 20 },
+    { "name": "Postline", "trackingPrefix": "PL", "weight": 15 }
+  ],
+  "serviceLevels": [
+    { "value": "standard", "weight": 78 },
+    { "value": "express", "weight": 17 },
+    { "value": "next_day", "weight": 5 }
+  ],
+  "returnReasons": [
+    { "value": "wrong_size", "weight": 30 },
+    { "value": "changed_mind", "weight": 22 },
+    { "value": "damaged_in_transit", "weight": 12 },
+    { "value": "not_as_described", "weight": 14 },
+    { "value": "defective", "weight": 10 },
+    { "value": "arrived_too_late", "weight": 6 },
+    { "value": "wrong_item_sent", "weight": 6 }
+  ],
+  "paymentMethods": [
+    { "value": "card", "weight": 58 },
+    { "value": "digital_wallet", "weight": 22 },
+    { "value": "pay_later", "weight": 10 },
+    { "value": "bank_transfer", "weight": 7 },
+    { "value": "gift_card", "weight": 3 }
+  ],
+  "salesChannels": [
+    { "value": "web", "weight": 52 },
+    { "value": "ios_app", "weight": 24 },
+    { "value": "android_app", "weight": 18 },
+    { "value": "marketplace", "weight": 6 }
+  ],
+  "promotions": [
+    {
+      "codePrefix": "NEWYEAR",
+      "description": "New year clearance across all categories",
+      "discountType": "percent",
+      "discountValue": 15,
+      "minOrderAmount": 40,
+      "month": 1,
+      "startDay": 2,
+      "durationDays": 14
+    },
+    {
+      "codePrefix": "WINTER",
+      "description": "Winter sale on fashion and outdoors",
+      "discountType": "percent",
+      "discountValue": 20,
+      "minOrderAmount": 60,
+      "month": 2,
+      "startDay": 5,
+      "durationDays": 10
+    },
+    {
+      "codePrefix": "SPRING",
+      "description": "Spring refresh for home and garden",
+      "discountType": "percent",
+      "discountValue": 10,
+      "minOrderAmount": 30,
+      "month": 3,
+      "startDay": 15,
+      "durationDays": 21
+    },
+    {
+      "codePrefix": "EASTER",
+      "description": "Easter weekend free delivery",
+      "discountType": "free_shipping",
+      "discountValue": 0,
+      "minOrderAmount": null,
+      "month": 4,
+      "startDay": 3,
+      "durationDays": 5
+    },
+    {
+      "codePrefix": "SUMMER",
+      "description": "Summer savings on sports and travel",
+      "discountType": "fixed_amount",
+      "discountValue": 10,
+      "minOrderAmount": 75,
+      "month": 6,
+      "startDay": 10,
+      "durationDays": 18
+    },
+    {
+      "codePrefix": "BACK2SCHOOL",
+      "description": "Back to school stationery and tech",
+      "discountType": "percent",
+      "discountValue": 12,
+      "minOrderAmount": 35,
+      "month": 8,
+      "startDay": 18,
+      "durationDays": 21
+    },
+    {
+      "codePrefix": "AUTUMN",
+      "description": "Autumn comfort collection",
+      "discountType": "percent",
+      "discountValue": 10,
+      "minOrderAmount": 50,
+      "month": 10,
+      "startDay": 1,
+      "durationDays": 14
+    },
+    {
+      "codePrefix": "BLACKFRIDAY",
+      "description": "Black Friday week on electronics and beauty",
+      "discountType": "percent",
+      "discountValue": 25,
+      "minOrderAmount": 50,
+      "month": 11,
+      "startDay": 22,
+      "durationDays": 8
+    },
+    {
+      "codePrefix": "GIFTS",
+      "description": "Holiday gifting free express delivery",
+      "discountType": "free_shipping",
+      "discountValue": 0,
+      "minOrderAmount": 30,
+      "month": 12,
+      "startDay": 1,
+      "durationDays": 20
+    },
+    {
+      "codePrefix": "FLASH",
+      "description": "Flash sale for app users",
+      "discountType": "fixed_amount",
+      "discountValue": 5,
+      "minOrderAmount": 25,
+      "month": 5,
+      "startDay": 12,
+      "durationDays": 3
+    },
+    {
+      "codePrefix": "SPLASH",
+      "description": "Midsummer flash sale on audio",
+      "discountType": "percent",
+      "discountValue": 18,
+      "minOrderAmount": 40,
+      "month": 7,
+      "startDay": 8,
+      "durationDays": 4
+    },
+    {
+      "codePrefix": "COSY",
+      "description": "Cosy season bedding and bath",
+      "discountType": "percent",
+      "discountValue": 15,
+      "minOrderAmount": 45,
+      "month": 9,
+      "startDay": 20,
+      "durationDays": 10
+    }
+  ],
+  "welcomePromotion": {
+    "codePrefix": "WELCOME",
+    "description": "Welcome discount on first order",
+    "discountType": "percent",
+    "discountValue": 10,
+    "minOrderAmount": null
+  },
+  "freeShippingThreshold": 50,
+  "shippingFees": { "standard": 4.95, "express": 9.95, "next_day": 14.95 },
+  "loyaltyTiers": [
+    { "value": "none", "minOrders": 0 },
+    { "value": "silver", "minOrders": 3 },
+    { "value": "gold", "minOrders": 6 },
+    { "value": "platinum", "minOrders": 12 }
+  ],
+  "rates": {
+    "duplicateCustomerShare": 0.008,
+    "marketingOptInShare": 0.46,
+    "billingAddressShare": 0.25,
+    "extraShippingAddressShare": 0.15,
+    "productActiveShare": 0.92,
+    "productLaunchedInWindowShare": 0.3,
+    "inventoryPresenceShare": 0.75,
+    "promotionUsageShare": 0.35,
+    "cancellationShare": 0.03,
+    "failedPaymentAttemptShare": 0.04,
+    "latePaymentShare": 0.008,
+    "missingShipDateShare": 0.007,
+    "lostShipmentShare": 0.002,
+    "returnShare": 0.035,
+    "returnOverQuantityShare": 0.00012,
+    "repeatCustomerAlpha": 1.15
+  }
+}

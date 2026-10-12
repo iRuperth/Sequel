@@ -1,0 +1,67 @@
+{
+  "key": "fintech-006",
+  "order": 6,
+  "title": "Detect duplicate card swipes within two minutes",
+  "track": "data_engineer",
+  "difficulty": "advanced",
+  "topics": ["window_functions", "ctes", "data_quality", "date_time"],
+  "datasetSlugs": ["fintech"],
+  "mode": "read",
+  "stakeholder": {
+    "name": "Clara Jansen",
+    "role": "Chargeback Operations Lead",
+    "team": "Disputes and Chargebacks"
+  },
+  "businessContext": "Customers keep raising duplicate_processing disputes: a terminal retries an authorisation and the card is charged twice for the same amount at the same merchant within seconds. Clara wants to start refunding these proactively. As a first step she needs every suspected duplicate swipe of Q2 2026 so the team can size the problem before automating it.",
+  "requirements": [
+    "Consider purchases (transaction_type = 'purchase') with status settled or authorized and a mapped merchant (merchant_id is not null).",
+    "For each such purchase, look at the previous purchase on the same card, at the same merchant, for the same amount and currency, ordered by created_at and then transaction_id.",
+    "Flag the purchase as a duplicate when that previous purchase happened at most 120 seconds earlier.",
+    "Report duplicates whose own created_at falls in Q2 2026 (2026-04-01 00:00 UTC inclusive to 2026-07-01 00:00 UTC exclusive), with the original and duplicate transaction ids and the number of whole seconds between them."
+  ],
+  "acceptanceCriteria": [
+    "Columns are card_id, merchant_id, amount, currency, original_transaction_id, duplicate_transaction_id and seconds_apart, in that order.",
+    "seconds_apart is an integer between 0 and 120.",
+    "Each duplicate transaction appears once, paired with the purchase immediately before it."
+  ],
+  "expectedColumns": [
+    {
+      "name": "card_id",
+      "typeHint": "integer"
+    },
+    {
+      "name": "merchant_id",
+      "typeHint": "integer"
+    },
+    {
+      "name": "amount",
+      "typeHint": "decimal"
+    },
+    {
+      "name": "currency",
+      "typeHint": "text"
+    },
+    {
+      "name": "original_transaction_id",
+      "typeHint": "integer"
+    },
+    {
+      "name": "duplicate_transaction_id",
+      "typeHint": "integer"
+    },
+    {
+      "name": "seconds_apart",
+      "typeHint": "integer"
+    }
+  ],
+  "orderMatters": false,
+  "referenceSql": "WITH candidates AS (\n  SELECT transaction_id,\n         card_id,\n         merchant_id,\n         amount,\n         currency,\n         created_at,\n         LAG(transaction_id) OVER w AS previous_transaction_id,\n         LAG(created_at) OVER w AS previous_created_at\n  FROM fintech.transactions\n  WHERE status IN ('settled', 'authorized')\n    AND transaction_type = 'purchase'\n    AND merchant_id IS NOT NULL\n  WINDOW w AS (PARTITION BY card_id, merchant_id, amount, currency ORDER BY created_at, transaction_id)\n)\nSELECT card_id,\n       merchant_id,\n       amount,\n       currency,\n       previous_transaction_id AS original_transaction_id,\n       transaction_id AS duplicate_transaction_id,\n       EXTRACT(EPOCH FROM created_at - previous_created_at)::integer AS seconds_apart\nFROM candidates\nWHERE previous_transaction_id IS NOT NULL\n  AND created_at - previous_created_at <= INTERVAL '2 minutes'\n  AND created_at >= TIMESTAMPTZ '2026-04-01 00:00:00+00'\n  AND created_at < TIMESTAMPTZ '2026-07-01 00:00:00+00'\nORDER BY duplicate_transaction_id;\n",
+  "verificationSql": null,
+  "hints": [
+    "Partition a window by card_id, merchant_id, amount and currency so that only identical swipes are compared.",
+    "LAG(transaction_id) and LAG(created_at) give you the previous swipe in the partition; compare the timestamps with an interval.",
+    "Apply the Q2 filter after the window is computed so a duplicate on 1 April can still find an original from 31 March."
+  ],
+  "explanation": "LAG over a partition of identical card, merchant, amount and currency pairs each swipe with the one just before it, which is cheaper and easier to reason about than a self join. Filtering the time window after the LAG keeps originals that sit just before the period, and EXTRACT(EPOCH FROM interval) turns the gap into seconds.",
+  "estimatedMinutes": 30
+}

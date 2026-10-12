@@ -1,0 +1,64 @@
+{
+  "key": "fintech-009",
+  "order": 9,
+  "title": "Loan delinquency by origination cohort",
+  "track": "data_scientist",
+  "difficulty": "expert",
+  "topics": ["ctes", "aggregation", "analytics_patterns", "date_time"],
+  "datasetSlugs": ["fintech"],
+  "mode": "read",
+  "stakeholder": {
+    "name": "Ingrid Svensson",
+    "role": "Head of Credit Risk",
+    "team": "Credit Risk"
+  },
+  "businessContext": "The credit committee meets next week to review the consumer lending book. Ingrid wants a vintage view: for each origination month, how many loans were originated, how many are old enough to judge (seasoned), how many of the seasoned loans have ever been delinquent and how many defaulted. A loan counts as ever delinquent when any of its installments was missed or paid 30 or more days late.",
+  "requirements": [
+    "Use fintech.loans and fintech.loan_repayments; every repayment row is an installment that has already fallen due.",
+    "Bucket loans by the UTC month of originated_at, returned as the first day of the month.",
+    "A loan is seasoned when it has at least 3 due installments. A loan is ever delinquent when any installment has status 'missed' or days_past_due of 30 or more.",
+    "For each cohort return loans_originated, seasoned_loans, delinquent_loans (seasoned and ever delinquent), delinquency_rate_pct (delinquent over seasoned times 100, rounded to 2 decimals, null when there are no seasoned loans) and defaulted_loans (status 'defaulted').",
+    "Sort cohorts from oldest to newest."
+  ],
+  "acceptanceCriteria": [
+    "One row per origination month present in fintech.loans.",
+    "Columns are cohort_month, loans_originated, seasoned_loans, delinquent_loans, delinquency_rate_pct and defaulted_loans, in that order.",
+    "Loans without any repayment rows are counted as originated but not as seasoned."
+  ],
+  "expectedColumns": [
+    {
+      "name": "cohort_month",
+      "typeHint": "date"
+    },
+    {
+      "name": "loans_originated",
+      "typeHint": "integer"
+    },
+    {
+      "name": "seasoned_loans",
+      "typeHint": "integer"
+    },
+    {
+      "name": "delinquent_loans",
+      "typeHint": "integer"
+    },
+    {
+      "name": "delinquency_rate_pct",
+      "typeHint": "decimal"
+    },
+    {
+      "name": "defaulted_loans",
+      "typeHint": "integer"
+    }
+  ],
+  "orderMatters": true,
+  "referenceSql": "WITH loan_history AS (\n  SELECT l.loan_id,\n         DATE_TRUNC('month', l.originated_at AT TIME ZONE 'UTC')::date AS cohort_month,\n         l.status,\n         COUNT(r.repayment_id) AS due_installments,\n         COALESCE(BOOL_OR(r.status = 'missed' OR r.days_past_due >= 30), false) AS ever_delinquent\n  FROM fintech.loans AS l\n  LEFT JOIN fintech.loan_repayments AS r ON r.loan_id = l.loan_id\n  GROUP BY l.loan_id, cohort_month, l.status\n)\nSELECT cohort_month,\n       COUNT(*) AS loans_originated,\n       COUNT(*) FILTER (WHERE due_installments >= 3) AS seasoned_loans,\n       COUNT(*) FILTER (WHERE due_installments >= 3 AND ever_delinquent) AS delinquent_loans,\n       ROUND(\n         100.0 * COUNT(*) FILTER (WHERE due_installments >= 3 AND ever_delinquent)\n         / NULLIF(COUNT(*) FILTER (WHERE due_installments >= 3), 0),\n         2\n       ) AS delinquency_rate_pct,\n       COUNT(*) FILTER (WHERE status = 'defaulted') AS defaulted_loans\nFROM loan_history\nGROUP BY cohort_month\nORDER BY cohort_month;\n",
+  "verificationSql": null,
+  "hints": [
+    "Start with a CTE at loan grain: one row per loan with its cohort month, number of due installments and a delinquency flag.",
+    "LEFT JOIN the repayments so brand new loans without installments are still counted; BOOL_OR aggregates the delinquency condition per loan.",
+    "In the outer query use COUNT(*) FILTER (...) for each measure and NULLIF to avoid dividing by zero for young cohorts."
+  ],
+  "explanation": "Reducing repayments to loan grain first avoids double counting loans with many installments. The LEFT JOIN keeps loans that have no installment yet, BOOL_OR turns many installment rows into one flag, and the seasoning rule stops young cohorts from looking artificially healthy. NULLIF returns a null rate when a cohort has no seasoned loans instead of raising a division error.",
+  "estimatedMinutes": 35
+}

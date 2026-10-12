@@ -1,0 +1,32 @@
+{
+  "name": "@sequel/datasets",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "lint": "eslint --max-warnings=0 src",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@sequel/contracts": "workspace:*",
+    "pg": "^8.23.1",
+    "pg-copy-streams": "^7.0.0",
+    "yaml": "^2.9.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@sequel/eslint-config": "workspace:*",
+    "@sequel/tsconfig": "workspace:*",
+    "@types/node": "^24.0.0",
+    "eslint": "^10.12.0",
+    "typescript": "5.9.3",
+    "vitest": "^5.0.3",
+    "@types/pg": "^8.23.1",
+    "@types/pg-copy-streams": "^1.2.5"
+  }
+}

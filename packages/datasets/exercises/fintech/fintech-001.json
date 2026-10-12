@@ -1,0 +1,46 @@
+{
+  "key": "fintech-001",
+  "order": 1,
+  "title": "Card authorisation outcomes for June 2026",
+  "track": "data_analyst",
+  "difficulty": "beginner",
+  "topics": ["select_basics", "aggregation", "sorting_limiting"],
+  "datasetSlugs": ["fintech"],
+  "mode": "read",
+  "stakeholder": {
+    "name": "Lena Hoffmann",
+    "role": "Payments Operations Lead",
+    "team": "Payments Operations"
+  },
+  "businessContext": "Every Monday the Payments Operations team reviews how card authorisations ended in the previous month before the scheme performance call. The ops dashboard that used to provide this number is being migrated, so for the June 2026 review Lena needs the figures straight from the warehouse. Each row in fintech.transactions is one authorisation attempt and its status tells you whether it settled, is still authorised and waiting for clearing, was declined by the bank, or was reversed by the merchant.",
+  "requirements": [
+    "Use fintech.transactions and only include authorisations created in June 2026 (UTC), that is from 2026-06-01 00:00 inclusive to 2026-07-01 00:00 exclusive.",
+    "Return one row per status with the number of authorisations in that status.",
+    "Sort the result from the most frequent status to the least frequent one; break ties alphabetically by status."
+  ],
+  "acceptanceCriteria": [
+    "Exactly one row per status present in June 2026.",
+    "Columns are status and transaction_count, in that order.",
+    "The counts add up to the total number of authorisations created in June 2026."
+  ],
+  "expectedColumns": [
+    {
+      "name": "status",
+      "typeHint": "text"
+    },
+    {
+      "name": "transaction_count",
+      "typeHint": "integer"
+    }
+  ],
+  "orderMatters": true,
+  "referenceSql": "SELECT status,\n       COUNT(*) AS transaction_count\nFROM fintech.transactions\nWHERE created_at >= TIMESTAMPTZ '2026-06-01 00:00:00+00'\n  AND created_at < TIMESTAMPTZ '2026-07-01 00:00:00+00'\nGROUP BY status\nORDER BY transaction_count DESC, status;\n",
+  "verificationSql": null,
+  "hints": [
+    "Everything you need lives in fintech.transactions: created_at for the period filter and status for the grouping.",
+    "Filter with a half open range on created_at (>= the first of June and < the first of July) and GROUP BY status.",
+    "Alias COUNT(*) as transaction_count and ORDER BY transaction_count DESC, status so ties are deterministic."
+  ],
+  "explanation": "A half open date range keeps the filter index friendly and avoids missing authorisations created during the last second of June. Grouping by status and counting rows gives the distribution; ordering by the count with status as a tie breaker makes the output stable for the weekly report.",
+  "estimatedMinutes": 8
+}

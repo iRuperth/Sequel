@@ -1,0 +1,70 @@
+{
+  "baseCurrency": "EUR",
+  "rateSource": "ecb_reference",
+  "currencies": [
+    {
+      "code": "EUR",
+      "name": "Euro",
+      "minorUnits": 2,
+      "eurRate": 1,
+      "dailyVolatility": 0,
+      "meanReversion": 0
+    },
+    {
+      "code": "USD",
+      "name": "US Dollar",
+      "minorUnits": 2,
+      "eurRate": 1.0835,
+      "dailyVolatility": 0.0042,
+      "meanReversion": 0.012
+    },
+    {
+      "code": "GBP",
+      "name": "Pound Sterling",
+      "minorUnits": 2,
+      "eurRate": 0.8512,
+      "dailyVolatility": 0.0026,
+      "meanReversion": 0.015
+    },
+    {
+      "code": "CHF",
+      "name": "Swiss Franc",
+      "minorUnits": 2,
+      "eurRate": 0.9634,
+      "dailyVolatility": 0.0031,
+      "meanReversion": 0.012
+    },
+    {
+      "code": "SEK",
+      "name": "Swedish Krona",
+      "minorUnits": 2,
+      "eurRate": 11.4205,
+      "dailyVolatility": 0.0039,
+      "meanReversion": 0.01
+    },
+    {
+      "code": "NOK",
+      "name": "Norwegian Krone",
+      "minorUnits": 2,
+      "eurRate": 11.6418,
+      "dailyVolatility": 0.0045,
+      "meanReversion": 0.01
+    },
+    {
+      "code": "PLN",
+      "name": "Polish Zloty",
+      "minorUnits": 2,
+      "eurRate": 4.3127,
+      "dailyVolatility": 0.0033,
+      "meanReversion": 0.012
+    },
+    {
+      "code": "JPY",
+      "name": "Japanese Yen",
+      "minorUnits": 0,
+      "eurRate": 163.24,
+      "dailyVolatility": 0.0058,
+      "meanReversion": 0.008
+    }
+  ]
+}

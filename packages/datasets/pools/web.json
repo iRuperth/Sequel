@@ -1,0 +1,431 @@
+{
+  "visitorIdPrefix": "v_",
+  "siteCurrency": "EUR",
+  "campaignTemplates": [
+    {
+      "name": "Brand search always on",
+      "channel": "paid_search",
+      "utmSource": "search_ads",
+      "utmMedium": "cpc",
+      "alwaysOn": true,
+      "durationDays": [365, 365],
+      "budgetRange": [40000, 90000],
+      "weight": 30
+    },
+    {
+      "name": "Generic search",
+      "channel": "paid_search",
+      "utmSource": "search_ads",
+      "utmMedium": "cpc",
+      "alwaysOn": false,
+      "durationDays": [21, 60],
+      "budgetRange": [8000, 30000],
+      "weight": 18
+    },
+    {
+      "name": "Social prospecting",
+      "channel": "paid_social",
+      "utmSource": "social_ads",
+      "utmMedium": "paid_social",
+      "alwaysOn": false,
+      "durationDays": [14, 45],
+      "budgetRange": [6000, 25000],
+      "weight": 16
+    },
+    {
+      "name": "Retargeting",
+      "channel": "display",
+      "utmSource": "display_network",
+      "utmMedium": "display",
+      "alwaysOn": false,
+      "durationDays": [30, 75],
+      "budgetRange": [4000, 15000],
+      "weight": 10
+    },
+    {
+      "name": "Newsletter",
+      "channel": "email",
+      "utmSource": "newsletter",
+      "utmMedium": "email",
+      "alwaysOn": false,
+      "durationDays": [3, 10],
+      "budgetRange": [300, 1500],
+      "weight": 14
+    },
+    {
+      "name": "Partner offers",
+      "channel": "affiliate",
+      "utmSource": "affiliate_network",
+      "utmMedium": "affiliate",
+      "alwaysOn": false,
+      "durationDays": [30, 90],
+      "budgetRange": [3000, 12000],
+      "weight": 7
+    },
+    {
+      "name": "Video awareness",
+      "channel": "video",
+      "utmSource": "video_platform",
+      "utmMedium": "video",
+      "alwaysOn": false,
+      "durationDays": [14, 30],
+      "budgetRange": [10000, 35000],
+      "weight": 5
+    }
+  ],
+  "campaignThemes": [
+    "New Year Refresh",
+    "Winter Sale",
+    "Spring Collection",
+    "Easter Weekend",
+    "Summer Essentials",
+    "Back to School",
+    "Autumn Comfort",
+    "Black Friday",
+    "Holiday Gifting",
+    "App Launch",
+    "Loyalty Week",
+    "Outdoor Season",
+    "Home Office",
+    "Flash Friday"
+  ],
+  "campaignsPerQuarter": 7,
+  "pages": [
+    { "path": "/", "pageType": "home", "weight": 22, "landingWeight": 34 },
+    { "path": "/search", "pageType": "search", "weight": 8, "landingWeight": 2 },
+    { "path": "/cart", "pageType": "cart", "weight": 4, "landingWeight": 0.5 },
+    { "path": "/checkout", "pageType": "checkout", "weight": 1, "landingWeight": 0 },
+    {
+      "path": "/checkout/confirmation",
+      "pageType": "confirmation",
+      "weight": 0.5,
+      "landingWeight": 0
+    },
+    { "path": "/account", "pageType": "account", "weight": 3, "landingWeight": 2 },
+    { "path": "/account/orders", "pageType": "account", "weight": 2, "landingWeight": 1.5 },
+    { "path": "/help", "pageType": "help", "weight": 2, "landingWeight": 2 },
+    { "path": "/help/returns", "pageType": "help", "weight": 1.5, "landingWeight": 2 },
+    { "path": "/help/delivery", "pageType": "help", "weight": 1.5, "landingWeight": 1.5 },
+    { "path": "/blog/gift-guide", "pageType": "content", "weight": 1, "landingWeight": 3 },
+    { "path": "/blog/home-office-setup", "pageType": "content", "weight": 1, "landingWeight": 2.5 },
+    {
+      "path": "/blog/running-for-beginners",
+      "pageType": "content",
+      "weight": 0.8,
+      "landingWeight": 2
+    },
+    { "path": "/sale", "pageType": "landing", "weight": 3, "landingWeight": 8 },
+    { "path": "/new-arrivals", "pageType": "landing", "weight": 3, "landingWeight": 5 },
+    { "path": "/stores", "pageType": "content", "weight": 0.7, "landingWeight": 1 },
+    { "path": "/category/{category}", "pageType": "category", "weight": 16, "landingWeight": 14 },
+    { "path": "/products/{product}", "pageType": "product", "weight": 28, "landingWeight": 20 }
+  ],
+  "productSlugs": [
+    "wireless-headphones-pro",
+    "noise-cancelling-earbuds",
+    "portable-bluetooth-speaker",
+    "fast-charger-65w",
+    "usb-c-hub-7in1",
+    "mechanical-keyboard-tkl",
+    "ergonomic-wireless-mouse",
+    "smart-plug-2pack",
+    "video-doorbell",
+    "cast-iron-skillet",
+    "espresso-machine-compact",
+    "electric-kettle-matte",
+    "linen-duvet-cover",
+    "bath-towel-set",
+    "merino-crew-sweater",
+    "linen-shirt-relaxed",
+    "midi-wrap-dress",
+    "chino-trousers-slim",
+    "trail-running-shoes",
+    "leather-chelsea-boots",
+    "canvas-backpack-20l",
+    "yoga-mat-6mm",
+    "adjustable-dumbbells",
+    "two-person-tent",
+    "insulated-bottle-750ml",
+    "vitamin-c-serum",
+    "daily-sunscreen-spf50",
+    "eau-de-parfum-cedar",
+    "strategy-board-game",
+    "building-blocks-starter",
+    "whole-bean-coffee-1kg",
+    "green-tea-selection",
+    "olive-oil-extra-virgin",
+    "dotted-notebook-a5",
+    "fountain-pen-classic"
+  ],
+  "categorySlugs": [
+    "headphones-audio",
+    "phone-accessories",
+    "smart-home",
+    "computer-accessories",
+    "cookware",
+    "small-appliances",
+    "home-decor",
+    "bedding-bath",
+    "womens-clothing",
+    "mens-clothing",
+    "shoes",
+    "bags-accessories",
+    "fitness-equipment",
+    "camping-hiking",
+    "skincare",
+    "fragrance",
+    "books",
+    "board-games",
+    "coffee-tea"
+  ],
+  "searchTerms": [
+    "wireless headphones",
+    "running shoes",
+    "coffee beans",
+    "yoga mat",
+    "linen shirt",
+    "gift for dad",
+    "phone case",
+    "espresso machine",
+    "winter jacket",
+    "board games for adults",
+    "sunscreen",
+    "usb c charger",
+    "duvet cover double",
+    "kids toys",
+    "hiking boots",
+    "standing desk",
+    "scented candle",
+    "kettle",
+    "backpack",
+    "perfume"
+  ],
+  "referrerDomains": [
+    { "value": "news.example.com", "weight": 18 },
+    { "value": "deals-forum.example.net", "weight": 14 },
+    { "value": "techreviews.example.org", "weight": 12 },
+    { "value": "styleblog.example.com", "weight": 10 },
+    { "value": "pricecompare.example.eu", "weight": 22 },
+    { "value": "community.example.io", "weight": 8 },
+    { "value": "partner-shop.example.com", "weight": 6 },
+    { "value": "outdoor-mag.example.net", "weight": 5 },
+    { "value": "homeideas.example.co.uk", "weight": 5 }
+  ],
+  "searchEngines": [
+    { "value": "google", "weight": 86 },
+    { "value": "bing", "weight": 8 },
+    { "value": "duckduckgo", "weight": 4 },
+    { "value": "ecosia", "weight": 2 }
+  ],
+  "devices": [
+    {
+      "value": "mobile",
+      "weight": 58,
+      "browsers": [
+        { "value": "Chrome Mobile", "weight": 52 },
+        { "value": "Mobile Safari", "weight": 40 },
+        { "value": "Samsung Internet", "weight": 6 },
+        { "value": "Firefox Mobile", "weight": 2 }
+      ],
+      "operatingSystems": [
+        { "value": "Android", "weight": 55 },
+        { "value": "iOS", "weight": 45 }
+      ]
+    },
+    {
+      "value": "desktop",
+      "weight": 35,
+      "browsers": [
+        { "value": "Chrome", "weight": 64 },
+        { "value": "Safari", "weight": 14 },
+        { "value": "Edge", "weight": 12 },
+        { "value": "Firefox", "weight": 10 }
+      ],
+      "operatingSystems": [
+        { "value": "Windows", "weight": 62 },
+        { "value": "macOS", "weight": 32 },
+        { "value": "Linux", "weight": 6 }
+      ]
+    },
+    {
+      "value": "tablet",
+      "weight": 7,
+      "browsers": [
+        { "value": "Mobile Safari", "weight": 62 },
+        { "value": "Chrome Mobile", "weight": 38 }
+      ],
+      "operatingSystems": [
+        { "value": "iPadOS", "weight": 62 },
+        { "value": "Android", "weight": 38 }
+      ]
+    }
+  ],
+  "botUserAgents": [
+    { "value": "HeadlessChrome", "weight": 40 },
+    { "value": "python-requests", "weight": 25 },
+    { "value": "curl", "weight": 10 },
+    { "value": "Scrapy", "weight": 15 },
+    { "value": "PhantomJS", "weight": 10 }
+  ],
+  "trafficCountries": [
+    { "value": "DE", "weight": 26 },
+    { "value": "FR", "weight": 14 },
+    { "value": "NL", "weight": 10 },
+    { "value": "ES", "weight": 11 },
+    { "value": "IT", "weight": 9 },
+    { "value": "GB", "weight": 12 },
+    { "value": "BE", "weight": 4 },
+    { "value": "AT", "weight": 4 },
+    { "value": "IE", "weight": 3 },
+    { "value": "PL", "weight": 3 },
+    { "value": "US", "weight": 4 }
+  ],
+  "experiments": [
+    {
+      "key": "checkout_one_page",
+      "name": "One page checkout",
+      "hypothesis": "Collapsing the three step checkout into a single page reduces abandonment and lifts purchase conversion.",
+      "primaryMetric": "purchase_conversion",
+      "startDaysAgo": 300,
+      "durationDays": 42,
+      "trafficAllocation": 0.5,
+      "treatmentLift": 1.14,
+      "stoppedEarly": false
+    },
+    {
+      "key": "pdp_sticky_add_to_cart",
+      "name": "Sticky add to cart button on product pages",
+      "hypothesis": "Keeping the add to cart button visible while scrolling increases add to cart rate on mobile.",
+      "primaryMetric": "add_to_cart_rate",
+      "startDaysAgo": 240,
+      "durationDays": 28,
+      "trafficAllocation": 0.4,
+      "treatmentLift": 1.06,
+      "stoppedEarly": false
+    },
+    {
+      "key": "free_shipping_banner",
+      "name": "Free shipping threshold banner",
+      "hypothesis": "Showing the free shipping threshold in the header raises average order value without hurting conversion.",
+      "primaryMetric": "purchase_conversion",
+      "startDaysAgo": 190,
+      "durationDays": 35,
+      "trafficAllocation": 0.5,
+      "treatmentLift": 1.03,
+      "stoppedEarly": false
+    },
+    {
+      "key": "search_autocomplete_v2",
+      "name": "Search autocomplete v2",
+      "hypothesis": "Product image suggestions in search autocomplete increase product page views per session.",
+      "primaryMetric": "purchase_conversion",
+      "startDaysAgo": 150,
+      "durationDays": 21,
+      "trafficAllocation": 0.3,
+      "treatmentLift": 0.97,
+      "stoppedEarly": true
+    },
+    {
+      "key": "homepage_personalised_hero",
+      "name": "Personalised homepage hero",
+      "hypothesis": "A hero banner based on recently viewed categories improves click through and conversion for returning visitors.",
+      "primaryMetric": "purchase_conversion",
+      "startDaysAgo": 95,
+      "durationDays": 40,
+      "trafficAllocation": 0.5,
+      "treatmentLift": 1.08,
+      "stoppedEarly": false
+    },
+    {
+      "key": "express_wallet_checkout",
+      "name": "Express wallet checkout on cart",
+      "hypothesis": "Offering express wallet buttons on the cart page shortens checkout and lifts conversion on mobile.",
+      "primaryMetric": "purchase_conversion",
+      "startDaysAgo": 45,
+      "durationDays": 60,
+      "trafficAllocation": 0.5,
+      "treatmentLift": 1.11,
+      "stoppedEarly": false
+    },
+    {
+      "key": "newsletter_modal_delay",
+      "name": "Delayed newsletter modal",
+      "hypothesis": "Delaying the newsletter modal by 30 seconds reduces bounce rate without lowering sign ups.",
+      "primaryMetric": "newsletter_signup_rate",
+      "startDaysAgo": 30,
+      "durationDays": 45,
+      "trafficAllocation": 0.5,
+      "treatmentLift": 1.0,
+      "stoppedEarly": false
+    }
+  ],
+  "eventNames": {
+    "sessionStart": "session_start",
+    "scroll": "scroll",
+    "viewItem": "view_item",
+    "viewItemList": "view_item_list",
+    "search": "search",
+    "addToCart": "add_to_cart",
+    "removeFromCart": "remove_from_cart",
+    "beginCheckout": "begin_checkout",
+    "addPaymentInfo": "add_payment_info",
+    "purchase": "purchase",
+    "signUp": "sign_up",
+    "login": "login",
+    "newsletterSubscribe": "newsletter_subscribe",
+    "clickCta": "click_cta"
+  },
+  "signUpMethods": [
+    { "value": "email", "weight": 62 },
+    { "value": "google", "weight": 24 },
+    { "value": "apple", "weight": 14 }
+  ],
+  "ctaIds": [
+    "hero_banner",
+    "free_shipping_bar",
+    "recommendations_carousel",
+    "app_download_banner",
+    "size_guide_link"
+  ],
+  "newsletterPlacements": ["footer", "modal", "checkout_opt_in"],
+  "paymentTypes": ["card", "digital_wallet", "pay_later", "bank_transfer", "gift_card"],
+  "scrollDepths": [25, 50, 75, 90],
+  "orderReferencePrefix": "WEB",
+  "experimentMetrics": { "addToCart": "add_to_cart_rate" },
+  "funnelPaths": {
+    "product": "/products/{product}",
+    "cart": "/cart",
+    "checkout": "/checkout",
+    "confirmation": "/checkout/confirmation"
+  },
+  "pageTypes": {
+    "product": "product",
+    "category": "category",
+    "search": "search",
+    "cart": "cart",
+    "checkout": "checkout",
+    "confirmation": "confirmation"
+  },
+  "rates": {
+    "campaignShare": 0.36,
+    "organicShare": 0.62,
+    "referralShare": 0.38,
+    "loggedInShare": 0.22,
+    "botSessionShare": 0.008,
+    "droppedSessionShare": 0.004,
+    "meanExtraPageViews": 1.9,
+    "maxPageViews": 30,
+    "scrollProbability": 0.62,
+    "ctaClickProbability": 0.22,
+    "searchProbability": 0.18,
+    "addToCartProbability": 0.2,
+    "removeFromCartProbability": 0.12,
+    "checkoutProbability": 0.55,
+    "paymentInfoProbability": 0.8,
+    "purchaseProbability": 0.72,
+    "signUpProbability": 0.02,
+    "loginProbability": 0.12,
+    "newsletterProbability": 0.015,
+    "meanOrderValue": 78
+  }
+}

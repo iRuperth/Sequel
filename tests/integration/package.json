@@ -1,0 +1,29 @@
+{
+  "name": "@sequel/integration-tests",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "lint": "eslint --max-warnings=0 src",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@sequel/config": "workspace:*",
+    "@sequel/contracts": "workspace:*",
+    "@sequel/core": "workspace:*",
+    "@sequel/datasets": "workspace:*",
+    "@sequel/db": "workspace:*",
+    "@sequel/sql-engine": "workspace:*",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "@sequel/eslint-config": "workspace:*",
+    "@sequel/tsconfig": "workspace:*",
+    "@types/node": "^24.0.0",
+    "@types/pg": "^8.23.1",
+    "eslint": "^10.12.0",
+    "typescript": "5.9.3",
+    "vitest": "^5.0.3"
+  }
+}

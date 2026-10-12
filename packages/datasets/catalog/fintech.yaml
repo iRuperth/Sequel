@@ -1,0 +1,651 @@
+dataset: fintech
+tables:
+  - name: account_holders
+    description: >-
+      Retail customers of the bank who passed onboarding. Sourced nightly from the customer master in the core
+      banking system. Customers onboarded before the July 2024 platform migration keep their original onboarding
+      timestamp. Closed customers stay in the table with status closed.
+    grain: One row per customer (account holder)
+    ownerTeam: Customer Data
+    tags: [customers, master_data, pii]
+    columns:
+      - name: holder_id
+        description: Surrogate key of the customer, stable across systems.
+        pii: false
+        exampleValues: ["1", "2417"]
+      - name: customer_number
+        description: Customer reference printed on statements and used by support agents.
+        pii: false
+        exampleValues: ["CUS11007922"]
+      - name: first_name
+        description: Legal first name as verified during KYC.
+        pii: true
+      - name: last_name
+        description: Legal last name as verified during KYC.
+        pii: true
+      - name: email
+        description: Contact email captured at sign up. Not guaranteed unique across customers.
+        pii: true
+      - name: phone_number
+        description: Mobile number in international format. Null when the customer never provided one.
+        pii: true
+      - name: date_of_birth
+        description: Date of birth from the identity document.
+        pii: true
+      - name: country_code
+        description: ISO 3166 alpha 2 country of residence. Drives the account currency.
+        pii: false
+        exampleValues: [DE, FR, GB]
+      - name: city
+        description: City of residence.
+        pii: false
+        exampleValues: [Berlin, Madrid]
+      - name: plan
+        description: Subscription plan of the customer.
+        pii: false
+        exampleValues: [standard, plus, premium]
+      - name: risk_rating
+        description: Customer risk rating assigned by compliance at onboarding and on periodic review.
+        pii: false
+        exampleValues: [low, medium, high]
+      - name: status
+        description: Lifecycle status of the customer relationship.
+        pii: false
+        exampleValues: [active, suspended, closed]
+      - name: onboarded_at
+        description: Timestamp (UTC) when onboarding completed and the customer could transact.
+        pii: false
+      - name: closed_at
+        description: Timestamp (UTC) when the relationship was closed. Null for active and suspended customers.
+        pii: false
+
+  - name: kyc_checks
+    description: >-
+      Know your customer checks run by external verification providers: identity documents, proof of address,
+      sanctions and politically exposed person screening. Sanctions screening is repeated every year. The raw
+      provider response is kept in payload.
+    grain: One row per verification request sent to a provider
+    ownerTeam: Financial Crime Compliance
+    tags: [compliance, kyc, pii]
+    columns:
+      - name: kyc_check_id
+        description: Surrogate key of the check.
+        pii: false
+      - name: holder_id
+        description: Customer the check belongs to.
+        pii: false
+      - name: check_type
+        description: Type of verification performed.
+        pii: false
+        exampleValues: [identity_document, proof_of_address, sanctions_screening, pep_screening]
+      - name: provider
+        description: External provider that performed the check.
+        pii: false
+        exampleValues: [VeriTrust, IdentiCheck]
+      - name: status
+        description: Outcome of the check. pending and manual_review are still in progress.
+        pii: false
+        exampleValues: [passed, failed, pending, manual_review]
+      - name: match_score
+        description: Provider confidence score from 0 to 100 (liveness for identity checks, best list match for sanctions). Null when not applicable.
+        pii: false
+      - name: payload
+        description: Raw JSON response summary from the provider, for example document type, issuing country or lists screened.
+        pii: true
+        exampleValues:
+          ['{"document_type": "passport", "issuing_country": "DE", "face_match": true}']
+      - name: submitted_at
+        description: Timestamp (UTC) when the request was sent to the provider.
+        pii: false
+      - name: completed_at
+        description: Timestamp (UTC) when the provider returned a final answer. Null while pending or in review.
+        pii: false
+
+  - name: accounts
+    description: >-
+      Customer accounts held at the bank: current accounts with cards, savings pots and business accounts.
+      current_balance is maintained by the core ledger and always equals the sum of the account postings in
+      ledger_postings (credits minus debits).
+    grain: One row per customer account
+    ownerTeam: Payments Data Platform
+    tags: [accounts, balances, core_banking]
+    columns:
+      - name: account_id
+        description: Surrogate key of the account.
+        pii: false
+      - name: holder_id
+        description: Customer who owns the account.
+        pii: false
+      - name: iban
+        description: International bank account number of the account.
+        pii: true
+      - name: account_type
+        description: Product type of the account.
+        pii: false
+        exampleValues: [current, savings, business]
+      - name: currency
+        description: ISO 4217 currency the account is held in.
+        pii: false
+        exampleValues: [EUR, GBP, USD]
+      - name: status
+        description: Account status. Frozen accounts cannot send money; closed accounts were paid out.
+        pii: false
+        exampleValues: [active, frozen, closed]
+      - name: overdraft_limit
+        description: Arranged overdraft limit in account currency. Zero when no overdraft was granted.
+        pii: false
+      - name: current_balance
+        description: Balance as of the snapshot date in account currency. Can be negative when the account is overdrawn.
+        pii: false
+      - name: opened_at
+        description: Timestamp (UTC) when the account was opened.
+        pii: false
+      - name: closed_at
+        description: Timestamp (UTC) when the account was closed. Null for open accounts.
+        pii: false
+
+  - name: cards
+    description: >-
+      Debit cards issued on current and business accounts, physical and virtual. Expired cards are replaced by a
+      renewal card issued a few weeks before expiry; lost or stolen cards are cancelled and reissued.
+    grain: One row per issued card
+    ownerTeam: Card Programmes
+    tags: [cards, issuing]
+    columns:
+      - name: card_id
+        description: Surrogate key of the card.
+        pii: false
+      - name: account_id
+        description: Account the card spends from.
+        pii: false
+      - name: holder_id
+        description: Customer the card was issued to.
+        pii: false
+      - name: network
+        description: Card scheme.
+        pii: false
+        exampleValues: [visa, mastercard]
+      - name: form_factor
+        description: Physical plastic or virtual card for online use.
+        pii: false
+        exampleValues: [physical, virtual]
+      - name: pan_last4
+        description: Last four digits of the card number. The full PAN never leaves the vault.
+        pii: true
+      - name: currency
+        description: Billing currency of the card, always equal to the account currency.
+        pii: false
+      - name: daily_limit
+        description: Daily spending limit in card currency.
+        pii: false
+      - name: status
+        description: Current card status.
+        pii: false
+        exampleValues: [active, blocked, expired, cancelled]
+      - name: issued_at
+        description: Timestamp (UTC) when the card was issued.
+        pii: false
+      - name: expires_on
+        description: Expiry date printed on the card. Can be in the future.
+        pii: false
+      - name: deactivated_at
+        description: Timestamp (UTC) when the card stopped working (blocked, expired or cancelled). Null for active cards.
+        pii: false
+
+  - name: merchant_categories
+    description: >-
+      Reference list of ISO 18245 merchant category codes (MCC) used by the card networks, grouped into the
+      category groups used in reporting. is_high_risk flags categories that the fraud team monitors more closely.
+    grain: One row per merchant category code
+    ownerTeam: Payments Data Platform
+    tags: [reference, merchants]
+    columns:
+      - name: mcc
+        description: Four digit merchant category code.
+        pii: false
+        exampleValues: ["5411", "5812", "6011"]
+      - name: category_name
+        description: Official description of the MCC.
+        pii: false
+        exampleValues: [Grocery Stores and Supermarkets]
+      - name: category_group
+        description: Reporting group used in dashboards and finance forecasts.
+        pii: false
+        exampleValues: [Groceries, Dining, Travel]
+      - name: is_high_risk
+        description: True for categories with elevated fraud or regulatory risk.
+        pii: false
+
+  - name: merchants
+    description: >-
+      Merchant directory maintained by the enrichment service. Raw card descriptors are matched to one of these
+      records; when matching fails the transaction keeps a null merchant_id. Online merchants have no city.
+    grain: One row per merchant location or online storefront
+    ownerTeam: Payments Data Platform
+    tags: [merchants, enrichment]
+    columns:
+      - name: merchant_id
+        description: Surrogate key of the merchant.
+        pii: false
+      - name: merchant_name
+        description: Clean merchant name shown in the app.
+        pii: false
+        exampleValues: [Shoply Marketplace, Juniper Bistro]
+      - name: mcc
+        description: Merchant category code of the merchant.
+        pii: false
+      - name: country_code
+        description: Country where the merchant is located or registered.
+        pii: false
+      - name: city
+        description: City of the physical location. Null for online merchants.
+        pii: false
+      - name: currency
+        description: Local currency the merchant normally charges in.
+        pii: false
+      - name: is_online
+        description: True for card not present merchants.
+        pii: false
+      - name: created_at
+        description: Timestamp (UTC) when the merchant record was created by enrichment.
+        pii: false
+
+  - name: transactions
+    description: >-
+      Card authorisations from the issuer processor, enriched with merchant data. Each row is one authorisation
+      attempt: approved attempts move from authorized to settled when the merchant clears them, declined attempts
+      carry a decline_reason and reversed ones were cancelled by the merchant. Refunds are separate rows of type
+      refund. Known issues: about 0.6 percent of rows have no mapped merchant (merchant_id is null), terminals
+      occasionally submit the same swipe twice within two minutes, and a small number of cross border purchases
+      were billed in the transaction currency instead of the card currency.
+    grain: One row per card authorisation attempt
+    ownerTeam: Payments Data Platform
+    tags: [payments, cards, transactions, flagship]
+    columns:
+      - name: transaction_id
+        description: Surrogate key of the authorisation, increasing with created_at.
+        pii: false
+      - name: card_id
+        description: Card used for the authorisation.
+        pii: false
+      - name: account_id
+        description: Account debited, denormalised from the card.
+        pii: false
+      - name: merchant_id
+        description: Merchant matched by enrichment. Null when the descriptor could not be mapped.
+        pii: false
+      - name: merchant_descriptor
+        description: Raw descriptor received from the network, as printed on the statement.
+        pii: false
+        exampleValues: ["SHOPLY MARKETPLACE*JL3WKE", "JUNIPER BISTRO BERLIN"]
+      - name: mcc
+        description: Merchant category code sent by the network. Always present, even when merchant_id is null.
+        pii: false
+      - name: transaction_type
+        description: Kind of card transaction.
+        pii: false
+        exampleValues: [purchase, refund, atm_withdrawal]
+      - name: channel
+        description: How the card was presented.
+        pii: false
+        exampleValues: [contactless, chip, ecommerce, atm]
+      - name: amount
+        description: Amount in the transaction currency as charged by the merchant. Always positive; refunds are identified by transaction_type.
+        pii: false
+      - name: currency
+        description: ISO 4217 currency of amount.
+        pii: false
+      - name: billing_amount
+        description: Amount converted to the billing currency at the daily reference rate. This is what the customer pays.
+        pii: false
+      - name: billing_currency
+        description: Currency of billing_amount. Should equal the card currency; a known processor issue leaves a few cross border rows in the transaction currency.
+        pii: false
+      - name: status
+        description: Lifecycle status of the authorisation.
+        pii: false
+        exampleValues: [authorized, settled, declined, reversed]
+      - name: decline_reason
+        description: Reason code for declined authorisations. Null otherwise.
+        pii: false
+        exampleValues: [insufficient_funds, suspected_fraud, incorrect_pin]
+      - name: created_at
+        description: Timestamp (UTC) of the authorisation request.
+        pii: false
+      - name: settled_at
+        description: Timestamp (UTC) when the transaction cleared. Null unless status is settled.
+        pii: false
+
+  - name: transfers
+    description: >-
+      Bank transfers in and out of customer accounts: inbound credits such as salaries, outbound payments to
+      external payees and internal book transfers between accounts of the bank. Only completed transfers are posted
+      to the ledger; failed and returned payments never move money.
+    grain: One row per payment instruction
+    ownerTeam: Payments Data Platform
+    tags: [payments, transfers, sepa]
+    columns:
+      - name: transfer_id
+        description: Surrogate key of the transfer, increasing with initiated_at.
+        pii: false
+      - name: transfer_type
+        description: Direction of the transfer from the bank point of view.
+        pii: false
+        exampleValues: [inbound, outbound, internal]
+      - name: from_account_id
+        description: Debited account at the bank. Null for inbound transfers from other banks.
+        pii: false
+      - name: to_account_id
+        description: Credited account at the bank. Null for outbound transfers to other banks.
+        pii: false
+      - name: counterparty_name
+        description: Name of the external sender or beneficiary. Can be a person or a company. Null for internal transfers.
+        pii: true
+      - name: counterparty_iban
+        description: IBAN of the external party. Null for internal transfers.
+        pii: true
+      - name: scheme
+        description: Payment rail used.
+        pii: false
+        exampleValues: [sepa_credit, sepa_instant, faster_payments, ach, swift, book_transfer]
+      - name: amount
+        description: Transfer amount in currency, always positive.
+        pii: false
+      - name: currency
+        description: ISO 4217 currency of the transfer, equal to the account currency.
+        pii: false
+      - name: reference
+        description: Free text remittance information entered by the payer.
+        pii: false
+        exampleValues: [Salary June 2026, Rent July, Monthly savings]
+      - name: status
+        description: Processing status. pending transfers were still in flight at the snapshot.
+        pii: false
+        exampleValues: [pending, completed, failed, returned]
+      - name: initiated_at
+        description: Timestamp (UTC) when the instruction was received.
+        pii: false
+      - name: completed_at
+        description: Timestamp (UTC) when funds were booked, or when a returned payment came back. Null for pending and failed.
+        pii: false
+
+  - name: fx_rates
+    description: >-
+      Daily reference exchange rates published against the euro. One unit of base_currency buys rate units of
+      quote_currency, so an amount in a quote currency converts to euro by dividing by the rate. Includes the
+      identity row for EUR.
+    grain: One row per day and quote currency
+    ownerTeam: Treasury
+    tags: [reference, fx, treasury]
+    columns:
+      - name: rate_date
+        description: Business date of the rate.
+        pii: false
+      - name: base_currency
+        description: Base currency, always EUR.
+        pii: false
+      - name: quote_currency
+        description: Quoted currency.
+        pii: false
+        exampleValues: [USD, GBP, CHF, JPY]
+      - name: rate
+        description: Units of quote currency per one unit of base currency.
+        pii: false
+        exampleValues: ["1.08350000", "0.85120000"]
+      - name: source
+        description: Publisher of the rate.
+        pii: false
+        exampleValues: [ecb_reference]
+
+  - name: fraud_alerts
+    description: >-
+      Alerts raised by the real time fraud rules engine on card authorisations and the analyst decision. Every
+      authorisation declined with reason suspected_fraud has an alert; other alerts were raised on approved
+      authorisations and reviewed afterwards.
+    grain: One row per alert
+    ownerTeam: Fraud and Financial Crime
+    tags: [risk, fraud]
+    columns:
+      - name: alert_id
+        description: Surrogate key of the alert.
+        pii: false
+      - name: transaction_id
+        description: Authorisation that triggered the alert.
+        pii: false
+      - name: card_id
+        description: Card of the authorisation, denormalised for case management.
+        pii: false
+      - name: rule_code
+        description: Identifier of the rule that fired.
+        pii: false
+        exampleValues: [VEL-001, GEO-002, AMT-003]
+      - name: rule_name
+        description: Human readable description of the rule.
+        pii: false
+      - name: risk_score
+        description: Model score between 0 and 100 at the time of the alert.
+        pii: false
+      - name: severity
+        description: Severity band derived from the score.
+        pii: false
+        exampleValues: [low, medium, high, critical]
+      - name: status
+        description: Case status. confirmed_fraud and false_positive are final decisions.
+        pii: false
+        exampleValues: [open, investigating, confirmed_fraud, false_positive]
+      - name: assigned_analyst
+        description: Handle of the fraud analyst working the case. Null for unassigned open alerts.
+        pii: true
+      - name: created_at
+        description: Timestamp (UTC) when the alert was raised.
+        pii: false
+      - name: resolved_at
+        description: Timestamp (UTC) of the final decision. Null while open or investigating.
+        pii: false
+
+  - name: disputes
+    description: >-
+      Chargeback disputes raised by customers on settled card transactions and their outcome with the card network.
+      won means the funds were recovered from the merchant. Known issue: a few fraud disputes have no matching fraud
+      alert because the rules engine missed the transaction.
+    grain: One row per dispute case
+    ownerTeam: Disputes and Chargebacks
+    tags: [risk, disputes, chargebacks]
+    columns:
+      - name: dispute_id
+        description: Surrogate key of the dispute.
+        pii: false
+      - name: transaction_id
+        description: Disputed transaction.
+        pii: false
+      - name: reason
+        description: Dispute reason chosen by the agent.
+        pii: false
+        exampleValues:
+          [
+            fraud,
+            duplicate_processing,
+            goods_not_received,
+            not_as_described,
+            cancelled_recurring,
+            incorrect_amount,
+          ]
+      - name: network_reason_code
+        description: Reason code submitted to the card network.
+        pii: false
+        exampleValues: ["10.4", "12.6.1", "13.1"]
+      - name: disputed_amount
+        description: Amount claimed back, in currency. Lower than the transaction amount for incorrect_amount disputes.
+        pii: false
+      - name: currency
+        description: Currency of disputed_amount, the billing currency of the transaction.
+        pii: false
+      - name: status
+        description: Case status.
+        pii: false
+        exampleValues: [open, under_review, won, lost, withdrawn]
+      - name: opened_at
+        description: Timestamp (UTC) when the customer raised the dispute.
+        pii: false
+      - name: resolved_at
+        description: Timestamp (UTC) when the case reached a final status. Null while open or under review.
+        pii: false
+
+  - name: loans
+    description: >-
+      Consumer loans originated by the lending product, repaid in equal monthly installments. status reflects
+      repayment behaviour at the snapshot: delinquent loans have a recent missed or very late installment and
+      defaulted loans stopped paying for three consecutive months.
+    grain: One row per loan contract
+    ownerTeam: Credit Risk
+    tags: [lending, credit]
+    columns:
+      - name: loan_id
+        description: Surrogate key of the loan, increasing with originated_at.
+        pii: false
+      - name: holder_id
+        description: Borrower.
+        pii: false
+      - name: account_id
+        description: Current account used for disbursement and repayments.
+        pii: false
+      - name: product
+        description: Loan product.
+        pii: false
+        exampleValues: [personal, auto, home_improvement, debt_consolidation]
+      - name: principal
+        description: Amount lent, in currency.
+        pii: false
+      - name: currency
+        description: Currency of the loan, equal to the account currency.
+        pii: false
+      - name: annual_rate
+        description: Nominal annual interest rate as a fraction (0.0799 means 7.99 percent).
+        pii: false
+      - name: term_months
+        description: Contractual number of monthly installments.
+        pii: false
+      - name: monthly_installment
+        description: Contractual monthly installment from the annuity schedule.
+        pii: false
+      - name: status
+        description: Loan status at the snapshot.
+        pii: false
+        exampleValues: [active, delinquent, defaulted, paid_off]
+      - name: originated_at
+        description: Timestamp (UTC) when the loan was disbursed.
+        pii: false
+      - name: first_due_date
+        description: Due date of the first installment.
+        pii: false
+
+  - name: loan_repayments
+    description: >-
+      Installments that have fallen due on each loan with what was actually paid. Future installments are not
+      included. days_past_due is measured at payment time for paid installments and at the snapshot date for
+      unpaid ones.
+    grain: One row per loan installment that has fallen due
+    ownerTeam: Credit Risk
+    tags: [lending, credit, collections]
+    columns:
+      - name: repayment_id
+        description: Surrogate key of the installment.
+        pii: false
+      - name: loan_id
+        description: Loan the installment belongs to.
+        pii: false
+      - name: installment_number
+        description: Sequence number of the installment, starting at 1.
+        pii: false
+      - name: due_date
+        description: Contractual due date.
+        pii: false
+      - name: amount_due
+        description: Amount due for the installment.
+        pii: false
+      - name: amount_paid
+        description: Amount actually collected. Zero for missed installments.
+        pii: false
+      - name: paid_at
+        description: Timestamp (UTC) of the collection. Null when nothing was paid.
+        pii: false
+      - name: days_past_due
+        description: Days between the due date and the payment, or between the due date and the snapshot when unpaid.
+        pii: false
+      - name: status
+        description: Installment outcome. pending means due in the last few days and still inside the grace period.
+        pii: false
+        exampleValues: [pending, paid, paid_late, partial, missed]
+
+  - name: ledger_postings
+    description: >-
+      Double entry postings of the core ledger. Every journal has exactly one debit and one credit of the same
+      amount. Customer accounts are liabilities of the bank, so a credit increases the customer balance and a debit
+      decreases it. Postings are generated from settled card transactions and completed transfers; the
+      opening_balance journals carry balances migrated from the previous core banking system at the start of the
+      data window.
+    grain: One row per ledger posting (one side of a journal)
+    ownerTeam: Finance Data
+    tags: [ledger, accounting, balances]
+    columns:
+      - name: posting_id
+        description: Surrogate key of the posting.
+        pii: false
+      - name: journal_id
+        description: Journal grouping the debit and the credit of one money movement.
+        pii: false
+      - name: account_id
+        description: Customer account affected. Null for postings on internal general ledger accounts.
+        pii: false
+      - name: gl_account
+        description: General ledger account of the posting.
+        pii: false
+        exampleValues:
+          [
+            customer_deposits,
+            card_scheme_settlement,
+            atm_network_settlement,
+            payment_clearing,
+            balance_migration,
+          ]
+      - name: entry_side
+        description: Debit or credit.
+        pii: false
+        exampleValues: [debit, credit]
+      - name: amount
+        description: Posted amount, always positive. The side gives the direction.
+        pii: false
+      - name: currency
+        description: Currency of the posting.
+        pii: false
+      - name: source_type
+        description: Business event that produced the journal.
+        pii: false
+        exampleValues: [card_transaction, transfer, opening_balance]
+      - name: source_id
+        description: Id of the source record. transaction_id for card_transaction, transfer_id for transfer and account_id for opening_balance.
+        pii: false
+      - name: posted_at
+        description: Timestamp (UTC) when the journal was booked.
+        pii: false
+links:
+  - fromTable: ledger_postings
+    fromColumn: source_id
+    toTable: transactions
+    toColumn: transaction_id
+    description: Card journals reference the settled authorisation when source_type is card_transaction.
+  - fromTable: ledger_postings
+    fromColumn: source_id
+    toTable: transfers
+    toColumn: transfer_id
+    description: Transfer journals reference the completed transfer when source_type is transfer.
+  - fromTable: ledger_postings
+    fromColumn: source_id
+    toTable: accounts
+    toColumn: account_id
+    description: Opening balance journals reference the migrated account when source_type is opening_balance.
+  - fromTable: transactions
+    fromColumn: billing_currency
+    toTable: fx_rates
+    toColumn: quote_currency
+    description: Billing amounts are converted with the reference rate of the authorisation date.

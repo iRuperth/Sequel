@@ -1,0 +1,923 @@
+{
+  "functionalCurrency": "EUR",
+  "homeCountry": "DE",
+  "invoicePrefixes": { "payable": "AP", "receivable": "AR" },
+  "referencePrefixes": { "payroll": "PAYROLL", "accrual": "ACCR" },
+  "ledgerDescriptions": {
+    "tax": "VAT on {reference}",
+    "control": "{counterparty} invoice {reference}",
+    "payment": "Settlement of {reference}",
+    "payroll": "Payroll {period}",
+    "accrual": "Month end accrual {account}",
+    "accrualReversal": "Reversal of accrual {account}"
+  },
+  "costCenters": [
+    {
+      "code": "CC-1000",
+      "name": "Executive Office",
+      "division": "Corporate",
+      "monthlyPayroll": 160000,
+      "isActive": true
+    },
+    {
+      "code": "CC-2000",
+      "name": "Technology",
+      "division": "Technology",
+      "monthlyPayroll": 95000,
+      "isActive": true
+    },
+    {
+      "code": "CC-2100",
+      "name": "Platform Engineering",
+      "division": "Technology",
+      "monthlyPayroll": 1250000,
+      "isActive": true
+    },
+    {
+      "code": "CC-2200",
+      "name": "Product Engineering",
+      "division": "Technology",
+      "monthlyPayroll": 1420000,
+      "isActive": true
+    },
+    {
+      "code": "CC-2300",
+      "name": "Data and Analytics",
+      "division": "Technology",
+      "monthlyPayroll": 690000,
+      "isActive": true
+    },
+    {
+      "code": "CC-2400",
+      "name": "Security",
+      "division": "Technology",
+      "monthlyPayroll": 270000,
+      "isActive": true
+    },
+    {
+      "code": "CC-2500",
+      "name": "Product Management",
+      "division": "Technology",
+      "monthlyPayroll": 430000,
+      "isActive": true
+    },
+    {
+      "code": "CC-2600",
+      "name": "Design",
+      "division": "Technology",
+      "monthlyPayroll": 310000,
+      "isActive": true
+    },
+    {
+      "code": "CC-3000",
+      "name": "Commercial",
+      "division": "Commercial",
+      "monthlyPayroll": 80000,
+      "isActive": true
+    },
+    {
+      "code": "CC-3100",
+      "name": "Sales",
+      "division": "Commercial",
+      "monthlyPayroll": 640000,
+      "isActive": true
+    },
+    {
+      "code": "CC-3200",
+      "name": "Marketing",
+      "division": "Commercial",
+      "monthlyPayroll": 410000,
+      "isActive": true
+    },
+    {
+      "code": "CC-3300",
+      "name": "Customer Support",
+      "division": "Commercial",
+      "monthlyPayroll": 620000,
+      "isActive": true
+    },
+    {
+      "code": "CC-4000",
+      "name": "Operations",
+      "division": "Operations",
+      "monthlyPayroll": 70000,
+      "isActive": true
+    },
+    {
+      "code": "CC-4100",
+      "name": "Payments Operations",
+      "division": "Operations",
+      "monthlyPayroll": 380000,
+      "isActive": true
+    },
+    {
+      "code": "CC-4200",
+      "name": "Risk and Compliance",
+      "division": "Operations",
+      "monthlyPayroll": 420000,
+      "isActive": true
+    },
+    {
+      "code": "CC-5000",
+      "name": "Corporate Functions",
+      "division": "Corporate",
+      "monthlyPayroll": 60000,
+      "isActive": true
+    },
+    {
+      "code": "CC-5100",
+      "name": "Finance",
+      "division": "Corporate",
+      "monthlyPayroll": 280000,
+      "isActive": true
+    },
+    {
+      "code": "CC-5200",
+      "name": "People",
+      "division": "Corporate",
+      "monthlyPayroll": 190000,
+      "isActive": true
+    },
+    {
+      "code": "CC-5300",
+      "name": "Legal",
+      "division": "Corporate",
+      "monthlyPayroll": 150000,
+      "isActive": true
+    },
+    {
+      "code": "CC-5400",
+      "name": "Workplace",
+      "division": "Corporate",
+      "monthlyPayroll": 90000,
+      "isActive": true
+    },
+    {
+      "code": "CC-9000",
+      "name": "Legacy Card Programme",
+      "division": "Operations",
+      "monthlyPayroll": 1,
+      "isActive": false
+    }
+  ],
+  "chartOfAccounts": [
+    {
+      "code": "1000",
+      "name": "Cash at bank",
+      "type": "asset",
+      "subtype": "cash",
+      "normalBalance": "debit",
+      "isActive": true
+    },
+    {
+      "code": "1100",
+      "name": "Accounts receivable",
+      "type": "asset",
+      "subtype": "receivables",
+      "normalBalance": "debit",
+      "isActive": true
+    },
+    {
+      "code": "1400",
+      "name": "VAT receivable",
+      "type": "asset",
+      "subtype": "tax",
+      "normalBalance": "debit",
+      "isActive": true
+    },
+    {
+      "code": "1500",
+      "name": "Prepaid expenses",
+      "type": "asset",
+      "subtype": "prepayments",
+      "normalBalance": "debit",
+      "isActive": true
+    },
+    {
+      "code": "1700",
+      "name": "IT equipment",
+      "type": "asset",
+      "subtype": "fixed_assets",
+      "normalBalance": "debit",
+      "isActive": true
+    },
+    {
+      "code": "2000",
+      "name": "Accounts payable",
+      "type": "liability",
+      "subtype": "payables",
+      "normalBalance": "credit",
+      "isActive": true
+    },
+    {
+      "code": "2100",
+      "name": "Accrued liabilities",
+      "type": "liability",
+      "subtype": "accruals",
+      "normalBalance": "credit",
+      "isActive": true
+    },
+    {
+      "code": "2200",
+      "name": "VAT payable",
+      "type": "liability",
+      "subtype": "tax",
+      "normalBalance": "credit",
+      "isActive": true
+    },
+    {
+      "code": "2400",
+      "name": "Payroll liabilities",
+      "type": "liability",
+      "subtype": "payroll",
+      "normalBalance": "credit",
+      "isActive": true
+    },
+    {
+      "code": "3000",
+      "name": "Share capital",
+      "type": "equity",
+      "subtype": "equity",
+      "normalBalance": "credit",
+      "isActive": true
+    },
+    {
+      "code": "3100",
+      "name": "Retained earnings",
+      "type": "equity",
+      "subtype": "equity",
+      "normalBalance": "credit",
+      "isActive": true
+    },
+    {
+      "code": "4000",
+      "name": "Business account subscription revenue",
+      "type": "revenue",
+      "subtype": "operating_revenue",
+      "normalBalance": "credit",
+      "isActive": true
+    },
+    {
+      "code": "4100",
+      "name": "Interchange revenue",
+      "type": "revenue",
+      "subtype": "operating_revenue",
+      "normalBalance": "credit",
+      "isActive": true
+    },
+    {
+      "code": "4200",
+      "name": "Payments API revenue",
+      "type": "revenue",
+      "subtype": "operating_revenue",
+      "normalBalance": "credit",
+      "isActive": true
+    },
+    {
+      "code": "4300",
+      "name": "Professional services revenue",
+      "type": "revenue",
+      "subtype": "operating_revenue",
+      "normalBalance": "credit",
+      "isActive": true
+    },
+    {
+      "code": "4900",
+      "name": "Other income",
+      "type": "revenue",
+      "subtype": "other_income",
+      "normalBalance": "credit",
+      "isActive": true
+    },
+    {
+      "code": "6000",
+      "name": "Salaries and wages",
+      "type": "expense",
+      "subtype": "personnel",
+      "normalBalance": "debit",
+      "isActive": true
+    },
+    {
+      "code": "6050",
+      "name": "Contractors",
+      "type": "expense",
+      "subtype": "personnel",
+      "normalBalance": "debit",
+      "isActive": true
+    },
+    {
+      "code": "6100",
+      "name": "Cloud infrastructure",
+      "type": "expense",
+      "subtype": "technology",
+      "normalBalance": "debit",
+      "isActive": true
+    },
+    {
+      "code": "6150",
+      "name": "Software subscriptions",
+      "type": "expense",
+      "subtype": "technology",
+      "normalBalance": "debit",
+      "isActive": true
+    },
+    {
+      "code": "6200",
+      "name": "Office rent",
+      "type": "expense",
+      "subtype": "facilities",
+      "normalBalance": "debit",
+      "isActive": true
+    },
+    {
+      "code": "6250",
+      "name": "Utilities and facilities",
+      "type": "expense",
+      "subtype": "facilities",
+      "normalBalance": "debit",
+      "isActive": true
+    },
+    {
+      "code": "6300",
+      "name": "Marketing and advertising",
+      "type": "expense",
+      "subtype": "marketing",
+      "normalBalance": "debit",
+      "isActive": true
+    },
+    {
+      "code": "6350",
+      "name": "Events and sponsorships",
+      "type": "expense",
+      "subtype": "marketing",
+      "normalBalance": "debit",
+      "isActive": true
+    },
+    {
+      "code": "6400",
+      "name": "Travel and accommodation",
+      "type": "expense",
+      "subtype": "travel",
+      "normalBalance": "debit",
+      "isActive": true
+    },
+    {
+      "code": "6450",
+      "name": "Meals and entertainment",
+      "type": "expense",
+      "subtype": "travel",
+      "normalBalance": "debit",
+      "isActive": true
+    },
+    {
+      "code": "6500",
+      "name": "Legal fees",
+      "type": "expense",
+      "subtype": "professional_services",
+      "normalBalance": "debit",
+      "isActive": true
+    },
+    {
+      "code": "6550",
+      "name": "Audit and accounting fees",
+      "type": "expense",
+      "subtype": "professional_services",
+      "normalBalance": "debit",
+      "isActive": true
+    },
+    {
+      "code": "6600",
+      "name": "Consulting",
+      "type": "expense",
+      "subtype": "professional_services",
+      "normalBalance": "debit",
+      "isActive": true
+    },
+    {
+      "code": "6700",
+      "name": "Payment processing fees",
+      "type": "expense",
+      "subtype": "cost_of_revenue",
+      "normalBalance": "debit",
+      "isActive": true
+    },
+    {
+      "code": "6750",
+      "name": "Card scheme fees",
+      "type": "expense",
+      "subtype": "cost_of_revenue",
+      "normalBalance": "debit",
+      "isActive": true
+    },
+    {
+      "code": "6800",
+      "name": "Insurance",
+      "type": "expense",
+      "subtype": "general_admin",
+      "normalBalance": "debit",
+      "isActive": true
+    },
+    {
+      "code": "6850",
+      "name": "Training and education",
+      "type": "expense",
+      "subtype": "personnel",
+      "normalBalance": "debit",
+      "isActive": true
+    },
+    {
+      "code": "6900",
+      "name": "Recruitment fees",
+      "type": "expense",
+      "subtype": "personnel",
+      "normalBalance": "debit",
+      "isActive": true
+    },
+    {
+      "code": "6950",
+      "name": "Office supplies",
+      "type": "expense",
+      "subtype": "general_admin",
+      "normalBalance": "debit",
+      "isActive": true
+    },
+    {
+      "code": "6990",
+      "name": "Legacy telephony costs",
+      "type": "expense",
+      "subtype": "general_admin",
+      "normalBalance": "debit",
+      "isActive": false
+    }
+  ],
+  "systemAccounts": {
+    "cash": "1000",
+    "accountsReceivable": "1100",
+    "vatReceivable": "1400",
+    "accountsPayable": "2000",
+    "vatPayable": "2200",
+    "accruedLiabilities": "2100",
+    "salaries": "6000"
+  },
+  "vendors": [
+    {
+      "name": "Cumulus Cloud Services",
+      "countryCode": "IE",
+      "currency": "EUR",
+      "accountCodes": ["6100"],
+      "costCenterCodes": ["CC-2100", "CC-2200", "CC-2300"],
+      "meanLineAmount": 9000,
+      "paymentTermsDays": 30,
+      "weight": 12
+    },
+    {
+      "name": "Stratus Data Warehouse",
+      "countryCode": "US",
+      "currency": "USD",
+      "accountCodes": ["6100"],
+      "costCenterCodes": ["CC-2300"],
+      "meanLineAmount": 6000,
+      "paymentTermsDays": 30,
+      "weight": 5
+    },
+    {
+      "name": "Ledgerline Software",
+      "countryCode": "GB",
+      "currency": "GBP",
+      "accountCodes": ["6150"],
+      "costCenterCodes": ["CC-5100"],
+      "meanLineAmount": 1800,
+      "paymentTermsDays": 30,
+      "weight": 4
+    },
+    {
+      "name": "Teamspace Collaboration",
+      "countryCode": "US",
+      "currency": "USD",
+      "accountCodes": ["6150"],
+      "costCenterCodes": ["CC-2000", "CC-3000", "CC-5000"],
+      "meanLineAmount": 2500,
+      "paymentTermsDays": 30,
+      "weight": 6
+    },
+    {
+      "name": "Bastion Security Tools",
+      "countryCode": "DE",
+      "currency": "EUR",
+      "accountCodes": ["6150"],
+      "costCenterCodes": ["CC-2400"],
+      "meanLineAmount": 3000,
+      "paymentTermsDays": 30,
+      "weight": 3
+    },
+    {
+      "name": "Brightpath Recruitment",
+      "countryCode": "GB",
+      "currency": "GBP",
+      "accountCodes": ["6900"],
+      "costCenterCodes": ["CC-5200"],
+      "meanLineAmount": 7000,
+      "paymentTermsDays": 30,
+      "weight": 4
+    },
+    {
+      "name": "Holloway and Finch LLP",
+      "countryCode": "GB",
+      "currency": "GBP",
+      "accountCodes": ["6500"],
+      "costCenterCodes": ["CC-5300"],
+      "meanLineAmount": 9000,
+      "paymentTermsDays": 45,
+      "weight": 3
+    },
+    {
+      "name": "Kestrel Audit Partners",
+      "countryCode": "DE",
+      "currency": "EUR",
+      "accountCodes": ["6550"],
+      "costCenterCodes": ["CC-5100"],
+      "meanLineAmount": 12000,
+      "paymentTermsDays": 45,
+      "weight": 1.5
+    },
+    {
+      "name": "Meridian Strategy Consulting",
+      "countryCode": "NL",
+      "currency": "EUR",
+      "accountCodes": ["6600"],
+      "costCenterCodes": ["CC-1000", "CC-4000"],
+      "meanLineAmount": 15000,
+      "paymentTermsDays": 45,
+      "weight": 2
+    },
+    {
+      "name": "Adwave Media",
+      "countryCode": "IE",
+      "currency": "EUR",
+      "accountCodes": ["6300"],
+      "costCenterCodes": ["CC-3200"],
+      "meanLineAmount": 11000,
+      "paymentTermsDays": 30,
+      "weight": 8
+    },
+    {
+      "name": "Pixelreach Social Ads",
+      "countryCode": "US",
+      "currency": "USD",
+      "accountCodes": ["6300"],
+      "costCenterCodes": ["CC-3200"],
+      "meanLineAmount": 9000,
+      "paymentTermsDays": 30,
+      "weight": 6
+    },
+    {
+      "name": "Expo Horizon Events",
+      "countryCode": "DE",
+      "currency": "EUR",
+      "accountCodes": ["6350"],
+      "costCenterCodes": ["CC-3100", "CC-3200"],
+      "meanLineAmount": 8000,
+      "paymentTermsDays": 30,
+      "weight": 2
+    },
+    {
+      "name": "Skyway Travel Management",
+      "countryCode": "NL",
+      "currency": "EUR",
+      "accountCodes": ["6400", "6450"],
+      "costCenterCodes": ["CC-1000", "CC-3100", "CC-2200", "CC-4100", "CC-5100"],
+      "meanLineAmount": 1500,
+      "paymentTermsDays": 30,
+      "weight": 8
+    },
+    {
+      "name": "Urban Workspace Properties",
+      "countryCode": "DE",
+      "currency": "EUR",
+      "accountCodes": ["6200"],
+      "costCenterCodes": ["CC-5400"],
+      "meanLineAmount": 45000,
+      "paymentTermsDays": 15,
+      "weight": 2
+    },
+    {
+      "name": "Thamesbank Offices",
+      "countryCode": "GB",
+      "currency": "GBP",
+      "accountCodes": ["6200"],
+      "costCenterCodes": ["CC-5400"],
+      "meanLineAmount": 30000,
+      "paymentTermsDays": 15,
+      "weight": 1.5
+    },
+    {
+      "name": "Greenfield Energy",
+      "countryCode": "DE",
+      "currency": "EUR",
+      "accountCodes": ["6250"],
+      "costCenterCodes": ["CC-5400"],
+      "meanLineAmount": 4000,
+      "paymentTermsDays": 30,
+      "weight": 2
+    },
+    {
+      "name": "Payflow Processing",
+      "countryCode": "NL",
+      "currency": "EUR",
+      "accountCodes": ["6700"],
+      "costCenterCodes": ["CC-4100"],
+      "meanLineAmount": 25000,
+      "paymentTermsDays": 15,
+      "weight": 4
+    },
+    {
+      "name": "CardNet Scheme Services",
+      "countryCode": "BE",
+      "currency": "EUR",
+      "accountCodes": ["6750"],
+      "costCenterCodes": ["CC-4100"],
+      "meanLineAmount": 40000,
+      "paymentTermsDays": 15,
+      "weight": 3
+    },
+    {
+      "name": "Silverstone Insurance",
+      "countryCode": "GB",
+      "currency": "GBP",
+      "accountCodes": ["6800"],
+      "costCenterCodes": ["CC-5100"],
+      "meanLineAmount": 8000,
+      "paymentTermsDays": 30,
+      "weight": 1
+    },
+    {
+      "name": "Learnwell Academy",
+      "countryCode": "SE",
+      "currency": "SEK",
+      "accountCodes": ["6850"],
+      "costCenterCodes": ["CC-2100", "CC-2200", "CC-3300", "CC-5200"],
+      "meanLineAmount": 1500,
+      "paymentTermsDays": 30,
+      "weight": 2
+    },
+    {
+      "name": "Officeworks Supplies",
+      "countryCode": "PL",
+      "currency": "PLN",
+      "accountCodes": ["6950"],
+      "costCenterCodes": ["CC-5400"],
+      "meanLineAmount": 400,
+      "paymentTermsDays": 30,
+      "weight": 3
+    },
+    {
+      "name": "Nordic Contractors AB",
+      "countryCode": "SE",
+      "currency": "SEK",
+      "accountCodes": ["6050"],
+      "costCenterCodes": ["CC-2100", "CC-2200"],
+      "meanLineAmount": 9000,
+      "paymentTermsDays": 30,
+      "weight": 4
+    },
+    {
+      "name": "Vistula Dev House",
+      "countryCode": "PL",
+      "currency": "PLN",
+      "accountCodes": ["6050"],
+      "costCenterCodes": ["CC-2200"],
+      "meanLineAmount": 12000,
+      "paymentTermsDays": 30,
+      "weight": 3
+    },
+    {
+      "name": "Alpine Compliance Advisory",
+      "countryCode": "CH",
+      "currency": "CHF",
+      "accountCodes": ["6600"],
+      "costCenterCodes": ["CC-4200"],
+      "meanLineAmount": 10000,
+      "paymentTermsDays": 45,
+      "weight": 1.5
+    },
+    {
+      "name": "Fjordline Data Labelling",
+      "countryCode": "NO",
+      "currency": "NOK",
+      "accountCodes": ["6050"],
+      "costCenterCodes": ["CC-2300"],
+      "meanLineAmount": 5000,
+      "paymentTermsDays": 30,
+      "weight": 1
+    },
+    {
+      "name": "Harbor Hardware",
+      "countryCode": "NL",
+      "currency": "EUR",
+      "accountCodes": ["1700"],
+      "costCenterCodes": ["CC-5400", "CC-2000"],
+      "meanLineAmount": 6000,
+      "paymentTermsDays": 30,
+      "weight": 2
+    }
+  ],
+  "clients": [
+    {
+      "name": "Halvorsen Logistics",
+      "countryCode": "NO",
+      "currency": "NOK",
+      "accountCodes": ["4000", "4200"],
+      "costCenterCodes": ["CC-3100"],
+      "meanLineAmount": 6000,
+      "paymentTermsDays": 30,
+      "weight": 4
+    },
+    {
+      "name": "Brightwave Consulting",
+      "countryCode": "GB",
+      "currency": "GBP",
+      "accountCodes": ["4000"],
+      "costCenterCodes": ["CC-3100"],
+      "meanLineAmount": 3000,
+      "paymentTermsDays": 30,
+      "weight": 5
+    },
+    {
+      "name": "Arcadia Retail Group",
+      "countryCode": "DE",
+      "currency": "EUR",
+      "accountCodes": ["4200", "4300"],
+      "costCenterCodes": ["CC-3100"],
+      "meanLineAmount": 12000,
+      "paymentTermsDays": 30,
+      "weight": 6
+    },
+    {
+      "name": "Lumen Marketplaces",
+      "countryCode": "NL",
+      "currency": "EUR",
+      "accountCodes": ["4200"],
+      "costCenterCodes": ["CC-3100"],
+      "meanLineAmount": 9000,
+      "paymentTermsDays": 30,
+      "weight": 6
+    },
+    {
+      "name": "Pacific Rim Traders",
+      "countryCode": "US",
+      "currency": "USD",
+      "accountCodes": ["4200", "4300"],
+      "costCenterCodes": ["CC-3100"],
+      "meanLineAmount": 15000,
+      "paymentTermsDays": 45,
+      "weight": 3
+    },
+    {
+      "name": "Velocity Mobility",
+      "countryCode": "FR",
+      "currency": "EUR",
+      "accountCodes": ["4000", "4200"],
+      "costCenterCodes": ["CC-3100"],
+      "meanLineAmount": 8000,
+      "paymentTermsDays": 30,
+      "weight": 5
+    },
+    {
+      "name": "Swiss Alpine Hotels",
+      "countryCode": "CH",
+      "currency": "CHF",
+      "accountCodes": ["4000"],
+      "costCenterCodes": ["CC-3100"],
+      "meanLineAmount": 5000,
+      "paymentTermsDays": 30,
+      "weight": 2
+    },
+    {
+      "name": "Baltic Ventures",
+      "countryCode": "PL",
+      "currency": "PLN",
+      "accountCodes": ["4000"],
+      "costCenterCodes": ["CC-3100"],
+      "meanLineAmount": 4000,
+      "paymentTermsDays": 30,
+      "weight": 3
+    },
+    {
+      "name": "Cardiff Health Partners",
+      "countryCode": "GB",
+      "currency": "GBP",
+      "accountCodes": ["4300"],
+      "costCenterCodes": ["CC-3100"],
+      "meanLineAmount": 10000,
+      "paymentTermsDays": 45,
+      "weight": 2
+    },
+    {
+      "name": "CardNet Scheme Services",
+      "countryCode": "BE",
+      "currency": "EUR",
+      "accountCodes": ["4100"],
+      "costCenterCodes": ["CC-4100"],
+      "meanLineAmount": 60000,
+      "paymentTermsDays": 15,
+      "weight": 5
+    }
+  ],
+  "lineDescriptions": {
+    "1700": [
+      "Laptops for new joiners",
+      "Monitors and docking stations",
+      "Meeting room displays",
+      "Network switches"
+    ],
+    "4000": [
+      "Business account subscription",
+      "Premium plan seats",
+      "Additional user licences",
+      "Multi currency add on"
+    ],
+    "4100": ["Monthly interchange settlement", "Interchange true up", "Scheme incentive rebate"],
+    "4200": [
+      "Payments API volume tier",
+      "Payout API usage",
+      "Webhook and reporting add on",
+      "Sandbox to production uplift"
+    ],
+    "4300": [
+      "Integration services",
+      "Solution architecture workshop",
+      "Migration support",
+      "Dedicated support package"
+    ],
+    "6050": [
+      "Contract development sprint",
+      "Data labelling batch",
+      "QA contractors",
+      "Interim engineering support"
+    ],
+    "6100": [
+      "Compute instances",
+      "Managed Postgres clusters",
+      "Object storage",
+      "Data transfer out",
+      "Kubernetes control plane",
+      "Warehouse credits"
+    ],
+    "6150": [
+      "Collaboration suite seats",
+      "Accounting platform licence",
+      "Security scanning licence",
+      "Design tool seats",
+      "Observability platform"
+    ],
+    "6200": ["Office rent", "Service charge", "Parking spaces"],
+    "6250": ["Electricity", "Cleaning services", "Building maintenance"],
+    "6300": [
+      "Search advertising",
+      "Paid social campaign",
+      "Display retargeting",
+      "Influencer partnership",
+      "Brand creative production"
+    ],
+    "6350": ["Conference booth", "Event sponsorship", "Customer roundtable dinner"],
+    "6400": ["Flights", "Hotel accommodation", "Rail tickets", "Ground transport"],
+    "6450": ["Client dinner", "Team offsite catering", "Working lunch"],
+    "6500": ["Regulatory advice", "Contract review", "Employment law advice", "Trademark filing"],
+    "6550": ["Statutory audit fee", "Tax compliance services", "Interim review"],
+    "6600": ["Strategy engagement", "Regulatory compliance review", "Operating model assessment"],
+    "6700": ["Processing fees", "Chargeback handling fees", "Payout fees"],
+    "6750": ["Scheme assessment fees", "Cross border fees", "Network access fees"],
+    "6800": [
+      "Professional indemnity insurance",
+      "Cyber insurance premium",
+      "Directors and officers insurance"
+    ],
+    "6850": ["Online course licences", "Leadership training", "Certification exam fees"],
+    "6900": ["Placement fee", "Executive search retainer", "Job board subscription"],
+    "6950": ["Stationery", "Printer consumables", "Kitchen supplies"]
+  },
+  "accrualAccountCodes": ["6100", "6200", "6550"],
+  "budgetAccountCodes": [
+    "6000",
+    "6050",
+    "6100",
+    "6150",
+    "6200",
+    "6300",
+    "6400",
+    "6600",
+    "6700",
+    "6750"
+  ],
+  "exchangeRateCurrencies": ["USD", "GBP", "CHF", "SEK", "NOK", "PLN"],
+  "rates": {
+    "payableShare": 0.72,
+    "voidShare": 0.01,
+    "draftShareRecent": 0.3,
+    "partialPaymentShare": 0.02,
+    "latePaymentShare": 0.15,
+    "headerMismatchShare": 0.01,
+    "meanLinesPerInvoice": 3.6,
+    "budgetNoise": [0.88, 1.15]
+  }
+}

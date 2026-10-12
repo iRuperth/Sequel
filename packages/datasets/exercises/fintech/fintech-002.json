@@ -1,0 +1,55 @@
+{
+  "key": "fintech-002",
+  "order": 2,
+  "title": "Settled purchases by card network and merchant category",
+  "track": "data_analyst",
+  "difficulty": "beginner",
+  "topics": ["joins", "aggregation", "filtering"],
+  "datasetSlugs": ["fintech"],
+  "mode": "read",
+  "stakeholder": {
+    "name": "Marco Bianchi",
+    "role": "Card Partnerships Manager",
+    "team": "Card Programmes"
+  },
+  "businessContext": "We are renegotiating our issuing agreements with both card networks and the partnerships team wants to show where each network is used. Marco needs, for June 2026, how many settled purchases each network processed in each merchant category group and how many distinct cards were behind those purchases. Only purchases that the enrichment service mapped to a known merchant should count, because the network reports we will compare against are built on mapped merchants.",
+  "requirements": [
+    "Start from fintech.transactions and keep settled purchases (status = 'settled' and transaction_type = 'purchase') created in June 2026 (UTC).",
+    "Join fintech.cards to get the card network, fintech.merchants to get the merchant and fintech.merchant_categories to get the category group of the merchant.",
+    "Transactions without a mapped merchant (merchant_id is null) are out of scope.",
+    "Return one row per network and category group with the number of settled purchases and the number of distinct cards."
+  ],
+  "acceptanceCriteria": [
+    "Columns are network, category_group, settled_purchases and active_cards, in that order.",
+    "active_cards counts distinct card_id values, not transactions.",
+    "No row has a null network or category group."
+  ],
+  "expectedColumns": [
+    {
+      "name": "network",
+      "typeHint": "text"
+    },
+    {
+      "name": "category_group",
+      "typeHint": "text"
+    },
+    {
+      "name": "settled_purchases",
+      "typeHint": "integer"
+    },
+    {
+      "name": "active_cards",
+      "typeHint": "integer"
+    }
+  ],
+  "orderMatters": false,
+  "referenceSql": "SELECT c.network,\n       mc.category_group,\n       COUNT(*) AS settled_purchases,\n       COUNT(DISTINCT t.card_id) AS active_cards\nFROM fintech.transactions AS t\nJOIN fintech.cards AS c ON c.card_id = t.card_id\nJOIN fintech.merchants AS m ON m.merchant_id = t.merchant_id\nJOIN fintech.merchant_categories AS mc ON mc.mcc = m.mcc\nWHERE t.status = 'settled'\n  AND t.transaction_type = 'purchase'\n  AND t.created_at >= TIMESTAMPTZ '2026-06-01 00:00:00+00'\n  AND t.created_at < TIMESTAMPTZ '2026-07-01 00:00:00+00'\nGROUP BY c.network, mc.category_group\nORDER BY c.network, settled_purchases DESC, mc.category_group;\n",
+  "verificationSql": null,
+  "hints": [
+    "The network lives on fintech.cards and the category group on fintech.merchant_categories, reachable through fintech.merchants.mcc.",
+    "Inner joins naturally drop transactions whose merchant_id is null, which is exactly what the ticket asks for.",
+    "Use COUNT(*) for purchases and COUNT(DISTINCT t.card_id) for cards, grouped by network and category_group."
+  ],
+  "explanation": "Three inner joins walk from the authorisation to the card and to the merchant category. Because the merchant join is an inner join, unmapped transactions disappear without an explicit filter. Counting rows gives purchases while COUNT(DISTINCT card_id) gives the number of cards that were active in each cell.",
+  "estimatedMinutes": 12
+}
